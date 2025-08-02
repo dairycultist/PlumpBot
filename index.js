@@ -68,6 +68,16 @@ client.on(Events.MessageCreate, message => {
     }
 });
 
+function parseMeta(data, property) {
+
+    const result = /<meta property="/ + property + /" content="([^"]*)">/.exec(data);
+
+    if (result.length >= 2)
+        return result[1];
+
+    return "";
+}
+
 function inlineEmbedArt(message, siteName, siteImg, color, url, fixUrl) {
 
     fetch(fixUrl)
@@ -80,8 +90,9 @@ function inlineEmbedArt(message, siteName, siteImg, color, url, fixUrl) {
 
         console.log(data); // for testing
 
-        const image = /<meta property="og:image" content="([^"]*)">/.exec(data)[1];
-        const title = /<meta property="og:title" content="([^"]*)">/.exec(data)[1].replaceAll("&apos;", "'");
+        const image = parseMeta(data, "og:image");
+        const title = parseMeta(data, "og:title").replaceAll("&apos;", "'");
+        const description = parseMeta(data, "og:description").replaceAll("&apos;", "'");
 
         const exampleEmbed = {
             color: color,
@@ -91,6 +102,7 @@ function inlineEmbedArt(message, siteName, siteImg, color, url, fixUrl) {
                 name: siteName,
                 icon_url: siteImg
             },
+            description: description,
             image: { url: image },
             footer: {
                 text: "Sent by " + message.author.displayName,
