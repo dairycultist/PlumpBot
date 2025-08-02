@@ -29,11 +29,14 @@ client.once(Events.ClientReady, readyClient => {
 // message handling
 client.on(Events.MessageCreate, message => {
 
+    if (author.bot) { return; }
+
+    console.log(message);
+
     if (message.content.startsWith("https://www.deviantart.com/")) {
 
+        client.channels.cache.get(message.channelId).send(message.content.replace("deviantart", "fixdeviantart"));
     }
-
-    client.channels.cache.get(message.channelId).send(message.content);
 });
 
 // start bot
