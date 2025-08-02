@@ -12,19 +12,24 @@ function getToken() {
 
 const { Client, Events, GatewayIntentBits } = require("discord.js"); // npm install discord.js
 const token = getToken();
-const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+const client = new Client({
+    intents: [
+        GatewayIntentBits.Guilds,
+		GatewayIntentBits.GuildMessages,
+		GatewayIntentBits.MessageContent,
+		GatewayIntentBits.GuildMembers
+    ]
+});
 
 // executed once upon client ready
 client.once(Events.ClientReady, readyClient => {
 	console.log(`Ready! Logged in as ${readyClient.user.tag}`);
 });
 
-// command handling
-client.on(Events.InteractionCreate, interaction => {
+// message handling
+client.on(Events.MessageCreate, message => {
 
-	// if (!interaction.isChatInputCommand()) return;
-
-	console.log(interaction);
+	console.log(message);
 });
 
 // start bot
