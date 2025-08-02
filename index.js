@@ -29,9 +29,6 @@ client.once(Events.ClientReady, readyClient => {
 // https://www.pixiv.net/en/artworks/133419030
 // https://bsky.app/profile/ciel-goat.bsky.social/post/3lvf4kodkus2r
 
-// https://x.com/53hank/status/1951368034310103293
-// https://twitter.com/VeryFilthyThing/status/1951406765305676282
-
 // message handling
 client.on(Events.MessageCreate, message => {
 
@@ -52,13 +49,19 @@ client.on(Events.MessageCreate, message => {
 
         } else if (message.content.includes("/status/") && (message.content.startsWith("https://twitter.com/") || message.content.startsWith("https://x.com/"))) {
 
+            // https://x.com/53hank/status/1951368034310103293
+            // https://twitter.com/VeryFilthyThing/status/1951406765305676282
+            client.channels.cache.get(message.channelId).send("Twitter embeds don't work right now since Twitter sucks and wants me to poll its API. Sorry!");
+
+        } else if (message.content.includes("/post/") && message.content.startsWith("https://bsky.app/profile/")) {
+
             inlineEmbedArt(
                 message,
-                "Twitter",
-                "https://pngimg.com/uploads/twitter/small/twitter_PNG34.png",
-                0x1DA1F2,
+                "Bluesky",
+                "https://cdn.bsky.app/img/avatar/plain/did:plc:z72i7hdynmk6r22z27h6tvur/bafkreihagr2cmvl2jt4mgx3sppwe2it3fwolkrbtjrhcnwjk4jdijhsoze@jpeg",
+                0x4F9BD9,
                 message.content,
-                message.content.replace("x", "fixvx").replace("twitter", "fixvx")
+                message.content
             );
 
         }
@@ -74,6 +77,8 @@ function inlineEmbedArt(message, siteName, siteImg, color, url, fixUrl) {
         return response.text();
     })
     .then(data => {
+
+        console.log(data); // for testing
 
         const image = /<meta property="og:image" content="([^"]*)">/.exec(data)[1];
         const title = /<meta property="og:title" content="([^"]*)">/.exec(data)[1].replaceAll("&apos;", "'");
