@@ -19,7 +19,9 @@ function attemptEmbedArtFromMessage(client, message) {
 
             // https://x.com/53hank/status/1951368034310103293
             // https://twitter.com/VeryFilthyThing/status/1951406765305676282
-            client.channels.cache.get(message.channelId).send("Twitter embeds don't work right now since Twitter sucks and wants me to poll its API. Sorry!");
+            // Twitter embeds don't work right now since Twitter sucks and wants me to poll its API
+            client.channels.cache.get(message.channelId).send(message.content.replace("x", "fixvx").replace("twitter", "fixvx"));
+            message.delete();
 
         } else if (message.content.includes("/post/") && message.content.startsWith("https://bsky.app/profile/")) {
 
@@ -35,15 +37,20 @@ function attemptEmbedArtFromMessage(client, message) {
 
         } else if (message.content.includes("/artworks/") && message.content.startsWith("https://www.pixiv.net/")) {
 
-            embedArt(
-                client,
-                message,
-                "Pixiv",
-                "https://static.wikia.nocookie.net/logopedia/images/6/65/Pixiv_2010s_%28Add_icon%29.png",
-                0x0096FA,
-                message.content,
-                message.content
-            );
+            // Pixiv needs an API request to get the full image (otherwise it's cropped), see: https://stackoverflow.com/questions/69592843/how-to-fetch-image-from-api
+
+            client.channels.cache.get(message.channelId).send(message.content.replace("pixiv", "phixiv"));
+            message.delete();
+
+            // embedArt(
+            //     client,
+            //     message,
+            //     "Pixiv",
+            //     "https://static.wikia.nocookie.net/logopedia/images/6/65/Pixiv_2010s_%28Add_icon%29.png",
+            //     0x0096FA,
+            //     message.content,
+            //     message.content
+            // );
         }
     }
 };
