@@ -77,7 +77,7 @@ client.on(Events.MessageCreate, message => {
 
 function parseMeta(data, property) {
 
-    const result = new RegExp(`<meta property="${ property }" content="([^"]*)">`).exec(data);
+    const result = new RegExp(`<meta property="${ property }" content="([^"]*)"(?: data-next-head="")?(?:\/)?>`).exec(data);
 
     if (result)
         return result[1];
