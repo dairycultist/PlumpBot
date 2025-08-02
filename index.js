@@ -27,8 +27,9 @@ client.once(Events.ClientReady, readyClient => {
 });
 
 // https://www.pixiv.net/en/artworks/133419030
-// https://x.com/53hank/status/1951368034310103293
 // https://bsky.app/profile/ciel-goat.bsky.social/post/3lvf4kodkus2r
+
+// https://x.com/53hank/status/1951368034310103293
 // https://twitter.com/VeryFilthyThing/status/1951406765305676282
 
 // message handling
@@ -36,24 +37,35 @@ client.on(Events.MessageCreate, message => {
 
     if (message.author.bot) { return; }
 
-    console.log("'" + message.content + "'");
-
-    if (!message.content.includes(" ")) {
+    if (!message.content.includes(" ")) { // no need to trim, Discord does it for us
 
         if (message.content.startsWith("https://www.deviantart.com/")) {
 
             inlineEmbedArt(
+                message,
                 "DeviantArt",
                 "https://images.icon-icons.com/2972/PNG/512/deviantart_logo_icon_186874.png",
                 0x05CC46,
                 message.content,
                 message.content.replace("deviantart", "fixdeviantart")
             );
+
+        } else if (message.content.includes("/status/") && (message.content.startsWith("https://twitter.com/") || message.content.startsWith("https://x.com/"))) {
+
+            inlineEmbedArt(
+                message,
+                "Twitter",
+                "https://pngimg.com/uploads/twitter/small/twitter_PNG34.png",
+                0x1DA1F2,
+                message.content,
+                message.content.replace("x", "fixvx").replace("twitter", "fixvx")
+            );
+
         }
     }
 });
 
-function inlineEmbedArt(siteName, siteImg, color, url, fixUrl) {
+function inlineEmbedArt(message, siteName, siteImg, color, url, fixUrl) {
 
     fetch(fixUrl)
     .then(response => {
@@ -64,7 +76,7 @@ function inlineEmbedArt(siteName, siteImg, color, url, fixUrl) {
     .then(data => {
 
         const image = /<meta property="og:image" content="([^"]*)">/.exec(data)[1];
-        const title = /<meta property="og:title" content="([^"]*)">/.exec(data)[1];
+        const title = /<meta property="og:title" content="([^"]*)">/.exec(data)[1].replaceAll("&apos;", "'");
 
         const exampleEmbed = {
             color: color,
