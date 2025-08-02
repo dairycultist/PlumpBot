@@ -13,11 +13,11 @@ function getToken() {
 const { Client, Events, GatewayIntentBits } = require("discord.js"); // npm install discord.js
 const token = getToken();
 const client = new Client({
+    // https://discordjs.guide/popular-topics/intents.html#privileged-intents
     intents: [
         GatewayIntentBits.Guilds,
 		GatewayIntentBits.GuildMessages,
-		GatewayIntentBits.MessageContent,
-		GatewayIntentBits.GuildMembers
+		GatewayIntentBits.MessageContent
     ]
 });
 
@@ -29,7 +29,11 @@ client.once(Events.ClientReady, readyClient => {
 // message handling
 client.on(Events.MessageCreate, message => {
 
-	console.log(message);
+    if (message.content.startsWith("https://www.deviantart.com/")) {
+
+    }
+
+    client.channels.cache.get(message.channelId).send(message.content);
 });
 
 // start bot
