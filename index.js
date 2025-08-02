@@ -50,12 +50,12 @@ client.on(Events.MessageCreate, message => {
                 url: message.content,
                 author: {
                     name: "DeviantArt",
-                    icon_url: "https://upload.wikimedia.org/wikipedia/commons/3/36/DeviantArt_Logo2.svg"
+                    icon_url: "https://images.icon-icons.com/2972/PNG/512/deviantart_logo_icon_186874.png"
                 },
                 image: { url: image },
                 footer: {
                     text: "Sent by " + message.author.displayName,
-                    icon_url: message.author.avatarURL
+                    icon_url: message.author.avatarURL()
                 },
             };
 
