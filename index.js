@@ -11,7 +11,7 @@ function getToken() {
 }
 
 const { Client, Events, GatewayIntentBits, EmbedBuilder } = require("discord.js"); // npm install discord.js
-const { attemptEmbedArtFromMessage } = require("embed_art.js");
+const { attemptEmbedArtFromMessage } = require("./embed_art.js");
 const token = getToken();
 const client = new Client({
     // https://discordjs.guide/popular-topics/intents.html#privileged-intents
@@ -32,7 +32,7 @@ client.on(Events.MessageCreate, message => {
 
     if (message.author.bot) { return; }
 
-    attemptEmbedArtFromMessage(message);
+    attemptEmbedArtFromMessage(client, message);
 });
 
 // start bot

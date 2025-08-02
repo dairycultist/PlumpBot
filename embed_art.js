@@ -1,11 +1,12 @@
 
-function attemptEmbedArtFromMessage(message) {
+function attemptEmbedArtFromMessage(client, message) {
 
     if (!message.content.includes(" ")) { // no need to trim, Discord does it for us
 
         if (message.content.startsWith("https://www.deviantart.com/")) {
 
             embedArt(
+                client,
                 message,
                 "DeviantArt",
                 "https://images.icon-icons.com/2972/PNG/512/deviantart_logo_icon_186874.png",
@@ -23,6 +24,7 @@ function attemptEmbedArtFromMessage(message) {
         } else if (message.content.includes("/post/") && message.content.startsWith("https://bsky.app/profile/")) {
 
             embedArt(
+                client,
                 message,
                 "Bluesky",
                 "https://cdn.bsky.app/img/avatar/plain/did:plc:z72i7hdynmk6r22z27h6tvur/bafkreihagr2cmvl2jt4mgx3sppwe2it3fwolkrbtjrhcnwjk4jdijhsoze@jpeg",
@@ -34,6 +36,7 @@ function attemptEmbedArtFromMessage(message) {
         } else if (message.content.includes("/artworks/") && message.content.startsWith("https://www.pixiv.net/")) {
 
             embedArt(
+                client,
                 message,
                 "Pixiv",
                 "https://static.wikia.nocookie.net/logopedia/images/6/65/Pixiv_2010s_%28Add_icon%29.png",
@@ -55,7 +58,7 @@ function parseMeta(data, property) {
     return "";
 }
 
-function embedArt(message, siteName, siteImg, color, url, fixUrl) {
+function embedArt(client, message, siteName, siteImg, color, url, fixUrl) {
 
     fetch(fixUrl)
     .then(response => {
