@@ -1,11 +1,11 @@
 function getToken() {
 
     try {
-        return require("./config.json").token;
+        return require("../config.json").token;
     } catch (error) {
         console.error("Please run:");
-        console.error("echo '{ \"token\": \"<YOUR_TOKEN>\" }' > config.json");
-        console.error("with the appropriate key!");
+        console.error("echo '{ \"token\": \"<YOUR_TOKEN>\" }' > ../config.json");
+        console.error("with the appropriate key! Find your key by going to https://discord.com/developers/applications, selecting your app, selecting 'Bot' on the sidebar, and selecting 'Reset Token.'");
         process.exit(1);
     }
 }
