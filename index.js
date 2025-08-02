@@ -10,19 +10,22 @@ function getToken() {
     }
 }
 
-const { Client, Events, GatewayIntentBits } = require("discord.js");
+const { Client, Events, GatewayIntentBits } = require("discord.js"); // npm install discord.js
 const token = getToken();
-
-
-// Create a new client instance
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
-// When the client is ready, run this code (only once).
-// The distinction between `client: Client<boolean>` and `readyClient: Client<true>` is important for TypeScript developers.
-// It makes some properties non-nullable.
+// executed once upon client ready
 client.once(Events.ClientReady, readyClient => {
 	console.log(`Ready! Logged in as ${readyClient.user.tag}`);
 });
 
-// Log in to Discord with your client's token
+// command handling
+client.on(Events.InteractionCreate, interaction => {
+
+	// if (!interaction.isChatInputCommand()) return;
+
+	console.log(interaction);
+});
+
+// start bot
 client.login(token);
