@@ -31,7 +31,7 @@ client.on(Events.MessageCreate, message => {
 
     if (message.author.bot) { return; }
 
-    if (message.content.startsWith("https://www.deviantart.com/")) {
+    if (!message.content.includes(" ") && message.content.startsWith("https://www.deviantart.com/")) {
 
         fetch(message.content.replace("deviantart", "fixdeviantart"))
         .then(response => {
@@ -41,57 +41,21 @@ client.on(Events.MessageCreate, message => {
         })
         .then(data => {
 
-            const imageRegex = /<meta property="og:image" content="([^"]*)"><\/meta>/;
-
-            console.log(data);
-            console.log(imageRegex.exec(data)[1]);
+            const image = /<meta property="og:image" content="([^"]*)">/.exec(data)[1];
+            const title = /<meta property="og:title" content="([^"]*)">/.exec(data)[1];
 
             const exampleEmbed = {
                 color: 0x05CC46,
-                title: 'Some title',
-                url: 'https://discord.js.org',
+                title: title,
+                url: message.content,
                 author: {
-                    name: 'Some name',
-                    icon_url: 'https://i.imgur.com/AfFp7pu.png',
-                    url: 'https://discord.js.org',
+                    name: "DeviantArt",
+                    icon_url: "https://upload.wikimedia.org/wikipedia/commons/3/36/DeviantArt_Logo2.svg"
                 },
-                description: 'Some description here',
-                thumbnail: {
-                    url: imageRegex.exec(data)[1],
-                },
-                fields: [
-                    {
-                        name: 'Regular field title',
-                        value: 'Some value here',
-                    },
-                    {
-                        name: '\u200b',
-                        value: '\u200b',
-                        inline: false,
-                    },
-                    {
-                        name: 'Inline field title',
-                        value: 'Some value here',
-                        inline: true,
-                    },
-                    {
-                        name: 'Inline field title',
-                        value: 'Some value here',
-                        inline: true,
-                    },
-                    {
-                        name: 'Inline field title',
-                        value: 'Some value here',
-                        inline: true,
-                    },
-                ],
-                image: {
-                    url: 'https://i.imgur.com/AfFp7pu.png',
-                },
-                timestamp: new Date().toISOString(),
+                image: { url: image },
                 footer: {
-                    text: 'Some footer text here',
-                    icon_url: 'https://i.imgur.com/AfFp7pu.png',
+                    text: "Sent by " + message.author.displayName,
+                    icon_url: message.author.avatarURL
                 },
             };
 
