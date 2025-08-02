@@ -26,9 +26,6 @@ client.once(Events.ClientReady, readyClient => {
 	console.log(`Ready! Logged in as ${readyClient.user.tag}`);
 });
 
-// https://www.pixiv.net/en/artworks/133419030
-// https://bsky.app/profile/ciel-goat.bsky.social/post/3lvf4kodkus2r
-
 // message handling
 client.on(Events.MessageCreate, message => {
 
@@ -64,6 +61,16 @@ client.on(Events.MessageCreate, message => {
                 message.content
             );
 
+        } else if (message.content.includes("/artworks/") && message.content.startsWith("https://www.pixiv.net/")) {
+
+            inlineEmbedArt(
+                message,
+                "Pixiv",
+                "https://static.wikia.nocookie.net/logopedia/images/6/65/Pixiv_2010s_%28Add_icon%29.png",
+                0x0096FA,
+                message.content,
+                message.content
+            );
         }
     }
 });
@@ -72,7 +79,7 @@ function parseMeta(data, property) {
 
     const result = new RegExp(`<meta property="${ property }" content="([^"]*)">`).exec(data);
 
-    if (result.length >= 2)
+    if (result)
         return result[1];
 
     return "";
