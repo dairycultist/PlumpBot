@@ -8,15 +8,17 @@ function attemptEmbedArtFromMessage(client, message) {
 
         fetchCallback(message.content.replace("deviantart", "fixdeviantart"), false, (html) => {
 
-            embedArt(client, message,
-                "DeviantArt",
-                "https://images.icon-icons.com/2972/PNG/512/deviantart_logo_icon_186874.png",
-                0x05CC46,
-                parseMeta(html, "og:title").replaceAll("&apos;", "'"),
-                parseMeta(html, "og:description").replaceAll("&apos;", "'"),
-                message.content,
-                parseMeta(html, "og:image")
-            );
+            embedArt(client, message, {
+                site: {
+                    name: "DeviantArt",
+                    img: "https://images.icon-icons.com/2972/PNG/512/deviantart_logo_icon_186874.png",
+                    color: 0x05CC46
+                },
+                title: parseMeta(html, "og:title").replaceAll("&apos;", "'"),
+                description: parseMeta(html, "og:description").replaceAll("&apos;", "'"),
+                url: message.content,
+                images: [ parseMeta(html, "og:image") ]
+            });
         });
 
     } else if (message.content.includes("/status/") && (message.content.startsWith("https://twitter.com/") || message.content.startsWith("https://x.com/"))) {
@@ -40,17 +42,21 @@ function attemptEmbedArtFromMessage(client, message) {
 
                 const authorDID = json.posts[0].author.did.replaceAll(":", "%3A");
 
-                embedArt(client, message,
-                    "Bluesky",
-                    "https://cdn.bsky.app/img/avatar/plain/did:plc:z72i7hdynmk6r22z27h6tvur/bafkreihagr2cmvl2jt4mgx3sppwe2it3fwolkrbtjrhcnwjk4jdijhsoze@jpeg",
-                    0x4F9BD9,
-                    parseMeta(html, "og:title").replaceAll("&apos;", "'"),
-                    json.posts[0].record.text,
-                    message.content,
-                    json.posts[0].record.embed["$type"] == "app.bsky.embed.recordWithMedia"
-                    ? `https://video.bsky.app/watch/${ authorDID }/${ json.posts[0].record.embed.media.video.ref["$link"] }/thumbnail.jpg` // just put thumbnail
-                    : `https://cdn.bsky.app/img/feed_fullsize/plain/${ authorDID }/${ json.posts[0].record.embed.images[0].image.ref["$link"] }` // just put first image
-                );
+                embedArt(client, message, {
+                    site: {
+                        name: "Bluesky",
+                        img: "https://cdn.bsky.app/img/avatar/plain/did:plc:z72i7hdynmk6r22z27h6tvur/bafkreihagr2cmvl2jt4mgx3sppwe2it3fwolkrbtjrhcnwjk4jdijhsoze@jpeg",
+                        color: 0x4F9BD9,
+                    },
+                    title: parseMeta(html, "og:title").replaceAll("&apos;", "'"),
+                    description: json.posts[0].record.text,
+                    url: message.content,
+                    images: [
+                        json.posts[0].record.embed["$type"] == "app.bsky.embed.recordWithMedia"
+                        ? `https://video.bsky.app/watch/${ authorDID }/${ json.posts[0].record.embed.media.video.ref["$link"] }/thumbnail.jpg` // just put thumbnail
+                        : `https://cdn.bsky.app/img/feed_fullsize/plain/${ authorDID }/${ json.posts[0].record.embed.images[0].image.ref["$link"] }` // just put first image FOR NOW
+                    ]
+                });
             });
         });
 
@@ -93,7 +99,7 @@ function fetchCallback(url, textToJson, callback) {
     .catch(error => console.error("There was a problem fetching: ", error));
 }
 
-function embedArt(client, message, siteName, siteImg, color, title, description, url, image) {
+function embedArt(client, message, post) {
 
     // let examplePost = {
     //     site: {
@@ -112,15 +118,15 @@ function embedArt(client, message, siteName, siteImg, color, title, description,
     // };
 
     const embed = {
-        color: color,
-        title: title,
-        url: url,
         author: {
-            name: siteName,
-            icon_url: siteImg
+            name: post.site.name,
+            icon_url: post.site.img
         },
-        description: description,
-        image: { url: image },
+        color: post.site.color,
+        title: post.title,
+        description: post.description,
+        url: post.url,
+        image: { url: post.images[0] },
         footer: {
             text: "Sent by " + message.author.displayName,
             icon_url: message.author.avatarURL()
