@@ -42,6 +42,19 @@ function attemptEmbedArtFromMessage(client, message) {
 
                 const authorDID = json.posts[0].author.did.replaceAll(":", "%3A");
 
+                var images = [];
+
+                if (json.posts[0].record.embed["$type"] == "app.bsky.embed.recordWithMedia") {
+
+                    // video, just put thumbnail since we don't support bsky video embedding rn
+                    images.push(`https://video.bsky.app/watch/${ authorDID }/${ json.posts[0].record.embed.media.video.ref["$link"] }/thumbnail.jpg`);
+
+                } else {
+
+                    for (const imageObject of json.posts[0].record.embed.images)
+                        images.push(`https://cdn.bsky.app/img/feed_fullsize/plain/${ authorDID }/${ imageObject.image.ref["$link"] }`);
+                }
+
                 embedArt(client, message, {
                     site: {
                         name: "Bluesky",
@@ -51,11 +64,7 @@ function attemptEmbedArtFromMessage(client, message) {
                     title: parseMeta(html, "og:title").replaceAll("&apos;", "'"),
                     description: json.posts[0].record.text,
                     url: message.content,
-                    images: [
-                        json.posts[0].record.embed["$type"] == "app.bsky.embed.recordWithMedia"
-                        ? `https://video.bsky.app/watch/${ authorDID }/${ json.posts[0].record.embed.media.video.ref["$link"] }/thumbnail.jpg` // just put thumbnail
-                        : `https://cdn.bsky.app/img/feed_fullsize/plain/${ authorDID }/${ json.posts[0].record.embed.images[0].image.ref["$link"] }` // just put first image FOR NOW
-                    ]
+                    images: images
                 });
             });
         });
@@ -126,14 +135,17 @@ function embedArt(client, message, post) {
         title: post.title,
         description: post.description,
         url: post.url,
-        image: { url: post.images[0] },
+        image: post.images.length == 1 ? { url: post.images[0] } : undefined, // only put an image in the embed if it's the ONLY image
         footer: {
             text: "Sent by " + message.author.displayName,
             icon_url: message.author.avatarURL()
         },
     };
 
-    client.channels.cache.get(message.channelId).send({ embeds: [ embed ] });
+    client.channels.cache.get(message.channelId).send({
+        embeds: [ embed ],
+        files: post.images.length > 1 ? post.images : undefined // attach images above the embed if there are multiple
+    });
     message.delete();
 
     // TODO for posts that contain video, multiple images, or extended media in general, create a read-only thread and post them there (to prevent clutter)
