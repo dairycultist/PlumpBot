@@ -52,7 +52,7 @@ function attemptEmbedArtFromMessage(client, message) {
                     json.posts[0].record.text,
                     message.content,
                     json.posts[0].record.embed["$type"] == "app.bsky.embed.recordWithMedia"
-                    ? `https://video.bsky.app/watch/${ authorDID }/${ json.posts[0].record.embed.media.video.ref["$link"] }/thumbnail.jpg` // just gonna do thumbnail embed for now, we'll improve embeds with stats and improved media and whatnot later
+                    ? `https://video.bsky.app/watch/${ authorDID }/${ json.posts[0].record.embed.media.video.ref["$link"] }/thumbnail.jpg` // just put thumbnail
                     : `https://cdn.bsky.app/img/feed_fullsize/plain/${ authorDID }/${ json.posts[0].record.embed.images[0].image.ref["$link"] }` // just put first image
                 );
             });
@@ -93,12 +93,8 @@ function fetchCallback(url, textToJson, callback) {
         else
             return response.text();
     })
-    .then(data => {
-        callback(data);
-    })
-    .catch(error => {
-        console.error("There was a problem fetching: ", error);
-    });
+    .then(data => callback(data))
+    .catch(error => console.error("There was a problem fetching: ", error));
 }
 
 function embedArt(client, message, siteName, siteImg, color, title, description, url, image) {
@@ -121,6 +117,9 @@ function embedArt(client, message, siteName, siteImg, color, title, description,
 
     client.channels.cache.get(message.channelId).send({ embeds: [ embed ] });
     message.delete();
+
+    // TODO for posts that contain video, multiple images, or extended media in general, create a read-only thread and post them there (to prevent clutter)
+    // maybe add stats to the embed, like video length or image count
 }
 
 module.exports = {
