@@ -8,9 +8,7 @@ function attemptEmbedArtFromMessage(client, message) {
 
         fetchCallback(message.content.replace("deviantart", "fixdeviantart"), false, (html) => {
 
-            embedArt(
-                client,
-                message,
+            embedArt(client, message,
                 "DeviantArt",
                 "https://images.icon-icons.com/2972/PNG/512/deviantart_logo_icon_186874.png",
                 0x05CC46,
@@ -42,9 +40,7 @@ function attemptEmbedArtFromMessage(client, message) {
 
                 const authorDID = json.posts[0].author.did.replaceAll(":", "%3A");
 
-                embedArt(
-                    client,
-                    message,
+                embedArt(client, message,
                     "Bluesky",
                     "https://cdn.bsky.app/img/avatar/plain/did:plc:z72i7hdynmk6r22z27h6tvur/bafkreihagr2cmvl2jt4mgx3sppwe2it3fwolkrbtjrhcnwjk4jdijhsoze@jpeg",
                     0x4F9BD9,
@@ -98,6 +94,22 @@ function fetchCallback(url, textToJson, callback) {
 }
 
 function embedArt(client, message, siteName, siteImg, color, title, description, url, image) {
+
+    // let examplePost = {
+    //     site: {
+    //         name: "",
+    //         img: "",
+    //         color: 0
+    //     },
+    //     title: "",
+    //     description: "",
+    //     url: "",
+    //     images: [ "", "" ],
+    //     video: {
+    //         length: 10,
+    //         url: ""
+    //     }
+    // };
 
     const embed = {
         color: color,
