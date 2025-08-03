@@ -41,10 +41,7 @@ function attemptEmbedArtFromMessage(client, message) {
                 const description = parseMeta(html, "og:description").replaceAll("&apos;", "'");
 
                 // https://docs.bsky.app/docs/api/app-bsky-feed-get-posts
-
-                // https://public.api.bsky.app/xrpc/app.bsky.feed.getPosts?uris=URI_FROM_LINK_BELOW
-
-                // <link rel="alternate" href="at://did:plc:ha27j5253cvi5s4mjdcxuzo3/app.bsky.feed.post/3lk54j7zz6s2u" />
+                console.log("https://public.api.bsky.app/xrpc/app.bsky.feed.getPosts?uris=" + parseLink(html, "alternate"));
 
                 embedArt(
                     client,
@@ -66,22 +63,26 @@ function attemptEmbedArtFromMessage(client, message) {
             client.channels.cache.get(message.channelId).send(message.content.replace("pixiv", "phixiv"));
             message.delete();
 
-            // embedArt(
-            //     client,
-            //     message,
-            //     "Pixiv",
-            //     "https://static.wikia.nocookie.net/logopedia/images/6/65/Pixiv_2010s_%28Add_icon%29.png",
-            //     0x0096FA,
-            //     message.content,
-            //     message.content
-            // );
+            // "Pixiv",
+            // "https://static.wikia.nocookie.net/logopedia/images/6/65/Pixiv_2010s_%28Add_icon%29.png",
+            // 0x0096FA,
         }
     }
 };
 
-function parseMeta(data, property) {
+function parseMeta(html, property) {
 
-    const result = new RegExp(`<meta property="${ property }" content="([^"]*)"(?: data-next-head="")?(?:\/)?>`).exec(data);
+    const result = new RegExp(`<meta property="${ property }" content="([^"]*)"(?: data-next-head="")? ?\/?>`).exec(html);
+
+    if (result)
+        return result[1];
+
+    return "";
+}
+
+function parseLink(html, rel) {
+
+    const result = new RegExp(`<link rel="${ rel }" href="([^"]*)" ?\/?>`).exec(html);
 
     if (result)
         return result[1];
@@ -101,7 +102,7 @@ function fetchCallback(url, callback) {
         callback(html);
     })
     .catch(error => {
-        console.error("There was a problem with the fetch operation: ", error);
+        console.error("There was a problem fetching: ", error);
     });
 }
 
