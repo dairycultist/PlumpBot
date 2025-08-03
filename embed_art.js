@@ -52,7 +52,7 @@ function attemptEmbedArtFromMessage(client, message) {
                 } else {
 
                     for (const imageObject of json.posts[0].record.embed.images)
-                        images.push(`https://cdn.bsky.app/img/feed_fullsize/plain/${ authorDID }/${ imageObject.image.ref["$link"] }`);
+                        images.push(`https://cdn.bsky.app/img/feed_fullsize/plain/${ authorDID }/${ imageObject.image.ref["$link"] }@png`);
                 }
 
                 embedArt(client, message, {
@@ -142,9 +142,20 @@ function embedArt(client, message, post) {
         },
     };
 
+    var files = undefined;
+
+    // attach images above the embed if there are multiple
+    if (post.images.length > 1) {
+
+        files = [];
+
+        for (const image of post.images)
+            files.push({ attachment: image, name: "image.png" }); // currently assuming the attachment is a png. this works for bsky since we get to choose (@png in url), but might be unstable later
+    }
+
     client.channels.cache.get(message.channelId).send({
         embeds: [ embed ],
-        files: post.images.length > 1 ? post.images : undefined // attach images above the embed if there are multiple
+        files: files
     });
     message.delete();
 
