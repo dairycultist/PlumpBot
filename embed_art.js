@@ -5,7 +5,7 @@ function attemptEmbedArtFromMessage(client, message) {
 
         if (message.content.startsWith("https://www.deviantart.com/")) {
 
-            fetchCallback(message.content.replace("deviantart", "fixdeviantart"), (html) => {
+            fetchCallback(message.content.replace("deviantart", "fixdeviantart"), false, (html) => {
 
                 const image = parseMeta(html, "og:image");
                 const title = parseMeta(html, "og:title").replaceAll("&apos;", "'");
@@ -34,26 +34,27 @@ function attemptEmbedArtFromMessage(client, message) {
 
         } else if (message.content.includes("/post/") && message.content.startsWith("https://bsky.app/profile/")) {
 
-            fetchCallback(message.content, (html) => {
+            fetchCallback(message.content, false, (html) => {
 
-                const image = parseMeta(html, "og:image");
                 const title = parseMeta(html, "og:title").replaceAll("&apos;", "'");
-                const description = parseMeta(html, "og:description").replaceAll("&apos;", "'");
 
                 // https://docs.bsky.app/docs/api/app-bsky-feed-get-posts
-                console.log("https://public.api.bsky.app/xrpc/app.bsky.feed.getPosts?uris=" + parseLink(html, "alternate"));
+                fetchCallback("https://public.api.bsky.app/xrpc/app.bsky.feed.getPosts?uris=" + parseLink(html, "alternate"), true, (json) => {
 
-                embedArt(
-                    client,
-                    message,
-                    "Bluesky",
-                    "https://cdn.bsky.app/img/avatar/plain/did:plc:z72i7hdynmk6r22z27h6tvur/bafkreihagr2cmvl2jt4mgx3sppwe2it3fwolkrbtjrhcnwjk4jdijhsoze@jpeg",
-                    0x4F9BD9,
-                    title,
-                    description,
-                    message.content,
-                    image
-                );
+                    console.log(json);
+
+                    // embedArt(
+                    //     client,
+                    //     message,
+                    //     "Bluesky",
+                    //     "https://cdn.bsky.app/img/avatar/plain/did:plc:z72i7hdynmk6r22z27h6tvur/bafkreihagr2cmvl2jt4mgx3sppwe2it3fwolkrbtjrhcnwjk4jdijhsoze@jpeg",
+                    //     0x4F9BD9,
+                    //     title,
+                    //     "DESCRIPTION",
+                    //     message.content,
+                    //     "IMAGE"
+                    // );
+                });
             });
 
         } else if (message.content.includes("/artworks/") && message.content.startsWith("https://www.pixiv.net/")) {
@@ -90,16 +91,19 @@ function parseLink(html, rel) {
     return "";
 }
 
-function fetchCallback(url, callback) {
+function fetchCallback(url, textToJson, callback) {
 
     fetch(url)
     .then(response => {
         if (!response.ok)
             throw new Error(`HTTP error! status: ${response.status}`);
-        return response.text();
+        if (textToJson)
+            return response.json();
+        else
+            return response.text();
     })
-    .then(html => {
-        callback(html);
+    .then(data => {
+        callback(data);
     })
     .catch(error => {
         console.error("There was a problem fetching: ", error);
