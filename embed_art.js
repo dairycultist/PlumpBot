@@ -43,6 +43,8 @@ function attemptEmbedArtFromMessage(client, message) {
                 // https://docs.bsky.app/docs/api/app-bsky-feed-get-posts
                 fetchCallback("https://public.api.bsky.app/xrpc/app.bsky.feed.getPosts?uris=" + parseLink(html, "alternate"), true, (json) => {
 
+                    const authorDID = json.posts[0].author.did.replaceAll(":", "%3A");
+
                     embedArt(
                         client,
                         message,
@@ -53,8 +55,8 @@ function attemptEmbedArtFromMessage(client, message) {
                         json.posts[0].record.text,
                         message.content,
                         json.posts[0].record.embed.media == "app.bsky.embed.video"
-                        ? ""
-                        : `https://video.bsky.app/watch/${ json.posts[0].author.did.replaceAll(":", "%3A") }/${ json.posts[0].record.embed.media.video.ref["$link"] }/thumbnail.jpg` // just gonna do thumbnail embed for now, we'll improve embeds with stats and improved media and whatnot later
+                        ? `https://cdn.bsky.app/img/feed_fullsize/plain/${ authorDID }/${ json.posts[0].record.embed.images[0].image.ref["$link"] }` // just put first image
+                        : `https://video.bsky.app/watch/${ authorDID }/${ json.posts[0].record.embed.media.video.ref["$link"] }/thumbnail.jpg` // just gonna do thumbnail embed for now, we'll improve embeds with stats and improved media and whatnot later
                     );
                 });
             });
