@@ -54,9 +54,9 @@ function attemptEmbedArtFromMessage(client, message) {
                         title,
                         json.posts[0].record.text,
                         message.content,
-                        json.posts[0].record.embed.media == "app.bsky.embed.video"
-                        ? `https://cdn.bsky.app/img/feed_fullsize/plain/${ authorDID }/${ json.posts[0].record.embed.images[0].image.ref["$link"] }` // just put first image
-                        : `https://video.bsky.app/watch/${ authorDID }/${ json.posts[0].record.embed.media.video.ref["$link"] }/thumbnail.jpg` // just gonna do thumbnail embed for now, we'll improve embeds with stats and improved media and whatnot later
+                        json.posts[0].record.embed["$type"] == "app.bsky.embed.recordWithMedia"
+                        ? `https://video.bsky.app/watch/${ authorDID }/${ json.posts[0].record.embed.media.video.ref["$link"] }/thumbnail.jpg` // just gonna do thumbnail embed for now, we'll improve embeds with stats and improved media and whatnot later
+                        : `https://cdn.bsky.app/img/feed_fullsize/plain/${ authorDID }/${ json.posts[0].record.embed.images[0].image.ref["$link"] }` // just put first image
                     );
                 });
             });
