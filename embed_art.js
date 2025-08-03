@@ -38,22 +38,24 @@ function attemptEmbedArtFromMessage(client, message) {
 
                 const title = parseMeta(html, "og:title").replaceAll("&apos;", "'");
 
+                console.log("https://public.api.bsky.app/xrpc/app.bsky.feed.getPosts?uris=" + parseLink(html, "alternate"));
+
                 // https://docs.bsky.app/docs/api/app-bsky-feed-get-posts
                 fetchCallback("https://public.api.bsky.app/xrpc/app.bsky.feed.getPosts?uris=" + parseLink(html, "alternate"), true, (json) => {
 
-                    console.log(json);
-
-                    // embedArt(
-                    //     client,
-                    //     message,
-                    //     "Bluesky",
-                    //     "https://cdn.bsky.app/img/avatar/plain/did:plc:z72i7hdynmk6r22z27h6tvur/bafkreihagr2cmvl2jt4mgx3sppwe2it3fwolkrbtjrhcnwjk4jdijhsoze@jpeg",
-                    //     0x4F9BD9,
-                    //     title,
-                    //     "DESCRIPTION",
-                    //     message.content,
-                    //     "IMAGE"
-                    // );
+                    embedArt(
+                        client,
+                        message,
+                        "Bluesky",
+                        "https://cdn.bsky.app/img/avatar/plain/did:plc:z72i7hdynmk6r22z27h6tvur/bafkreihagr2cmvl2jt4mgx3sppwe2it3fwolkrbtjrhcnwjk4jdijhsoze@jpeg",
+                        0x4F9BD9,
+                        title,
+                        json.posts[0].record.text,
+                        message.content,
+                        json.posts[0].record.embed.media == "app.bsky.embed.video"
+                        ? ""
+                        : `https://video.bsky.app/watch/${ json.posts[0].author.did.replaceAll(":", "%3A") }/${ json.posts[0].record.embed.media.video.ref["$link"] }/thumbnail.jpg` // just gonna do thumbnail embed for now, we'll improve embeds with stats and improved media and whatnot later
+                    );
                 });
             });
 
