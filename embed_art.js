@@ -72,20 +72,14 @@ function parseMeta(html, property) {
 
     const result = new RegExp(`<meta property="${ property }" content="([^"]*)"(?: data-next-head="")? ?\/?>`).exec(html);
 
-    if (result)
-        return result[1];
-
-    return "";
+    return result ? result[1] : "";
 }
 
 function parseLink(html, rel) {
 
     const result = new RegExp(`<link rel="${ rel }" href="([^"]*)" ?\/?>`).exec(html);
 
-    if (result)
-        return result[1];
-
-    return "";
+    return result ? result[1] : "";
 }
 
 function fetchCallback(url, textToJson, callback) {
