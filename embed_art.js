@@ -91,8 +91,9 @@ function attemptEmbedArtFromMessage(client, message) {
 
             } else {
 
-                for (const page of json.illust.meta_pages)
-                    images.push(page.image_urls.original.replace("pximg.net", "pixiv.cat"));
+                // add images (given there are multiple), but only the first six
+                for (let i = 0; i < Math.min(6, json.illust.meta_pages.length); i++)
+                    images.push(json.illust.meta_pages[i].image_urls.original.replace("pximg.net", "pixiv.cat"));
             }
 
             embedArt(client, message, {
