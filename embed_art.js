@@ -6,7 +6,11 @@ function attemptEmbedArtFromMessage(client, message) {
 
     if (message.content.startsWith("https://www.deviantart.com/")) {
 
-        fetchCallback("https://backend.deviantart.com/oembed?url=" + message.content.replaceAll(":", "%3A").replaceAll("/", "%2F"), true, (json) => {
+        const url = "https://backend.deviantart.com/oembed?url=" + message.content.replaceAll(":", "%3A").replaceAll("/", "%2F");
+
+        // console.log(url);
+
+        fetchCallback(url, true, (json) => {
 
             embedArt(client, message, {
                 site: {
@@ -17,7 +21,7 @@ function attemptEmbedArtFromMessage(client, message) {
                 title: json.title,
                 description: "By " + json.copyright._attributes.entity,
                 url: message.content,
-                images: [ json.url ]
+                images: [ url.type == "video" ? json.thumbnail_url : json.url ] // might be able to parse out video from json.html, check later
             });
         });
 
