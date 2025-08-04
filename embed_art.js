@@ -6,7 +6,7 @@ function attemptEmbedArtFromMessage(client, message) {
 
     if (message.content.startsWith("https://www.deviantart.com/")) {
 
-        fetchCallback(message.content.replace("deviantart", "fixdeviantart"), false, (html) => {
+        fetchCallback("https://backend.deviantart.com/oembed?url=" + message.content.replaceAll(":", "%3A").replaceAll("/", "%2F"), true, (json) => {
 
             embedArt(client, message, {
                 site: {
@@ -14,10 +14,10 @@ function attemptEmbedArtFromMessage(client, message) {
                     img: "https://images.icon-icons.com/2972/PNG/512/deviantart_logo_icon_186874.png",
                     color: 0x05CC46
                 },
-                title: parseMeta(html, "og:title").replaceAll("&apos;", "'"),
-                description: parseMeta(html, "og:description").replaceAll("&apos;", "'"),
+                title: json.title,
+                description: "By " + json.copyright._attributes.entity,
                 url: message.content,
-                images: [ parseMeta(html, "og:image") ]
+                images: [ json.url ]
             });
         });
 
