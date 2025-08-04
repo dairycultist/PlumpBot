@@ -7,7 +7,6 @@ function attemptEmbedArtFromMessage(client, message) {
     if (message.content.startsWith("https://www.deviantart.com/")) {
 
         const url = "https://backend.deviantart.com/oembed?url=" + message.content.replaceAll(":", "%3A").replaceAll("/", "%2F");
-
         // console.log(url);
 
         fetchCallback(url, true, (json) => {
@@ -38,7 +37,6 @@ function attemptEmbedArtFromMessage(client, message) {
         fetchCallback(message.content, false, (html) => {
 
             const url = "https://public.api.bsky.app/xrpc/app.bsky.feed.getPosts?uris=" + parseLink(html, "alternate");
-
             // console.log(url);
 
             // https://docs.bsky.app/docs/api/app-bsky-feed-get-posts
@@ -78,8 +76,7 @@ function attemptEmbedArtFromMessage(client, message) {
         // API guide: https://stackoverflow.com/questions/69592843/how-to-fetch-image-from-api
 
         const url = "https://api.adoreanime.com/api/pixiv/?type=illust&id=" + message.content.split("/").pop();
-
-        console.log(url);
+        // console.log(url);
 
         fetchCallback(url, true, (json) => {
 
@@ -103,7 +100,7 @@ function attemptEmbedArtFromMessage(client, message) {
                     color: 0x0096FA
                 },
                 title: json.illust.title,
-                description: "By " + json.illust.user.name,
+                description: "By " + json.illust.user.name + " (" + json.illust.page_count + " total images)",
                 url: message.content,
                 images: images
             });
