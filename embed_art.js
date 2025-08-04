@@ -91,8 +91,8 @@ function attemptEmbedArtFromMessage(client, message) {
 
             } else {
 
-                for (const imageUrls of json.illust.meta_pages)
-                    images.push(imageUrls.original.replace("pximg.net", "pixiv.cat"));
+                for (const page of json.illust.meta_pages)
+                    images.push(page.image_urls.original.replace("pximg.net", "pixiv.cat"));
             }
 
             embedArt(client, message, {
