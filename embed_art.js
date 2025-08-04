@@ -75,9 +75,12 @@ function attemptEmbedArtFromMessage(client, message) {
 
     } else if (message.content.includes("/artworks/") && message.content.startsWith("https://www.pixiv.net/")) {
 
-        // Pixiv needs an API request to get the full image (otherwise it's cropped), see: https://stackoverflow.com/questions/69592843/how-to-fetch-image-from-api
+        // API: https://stackoverflow.com/questions/69592843/how-to-fetch-image-from-api
         // "https://static.wikia.nocookie.net/logopedia/images/6/65/Pixiv_2010s_%28Add_icon%29.png"
         // 0x0096FA
+
+        console.log("https://api.adoreanime.com/api/pixiv/?type=illust&id=" + message.content.split("/").pop());
+
         client.channels.cache.get(message.channelId).send(message.content.replace("pixiv", "phixiv"));
         message.delete();
     }
