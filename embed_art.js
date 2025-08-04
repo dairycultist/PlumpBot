@@ -75,14 +75,38 @@ function attemptEmbedArtFromMessage(client, message) {
 
     } else if (message.content.includes("/artworks/") && message.content.startsWith("https://www.pixiv.net/")) {
 
-        // API: https://stackoverflow.com/questions/69592843/how-to-fetch-image-from-api
-        // "https://static.wikia.nocookie.net/logopedia/images/6/65/Pixiv_2010s_%28Add_icon%29.png"
-        // 0x0096FA
+        // API guide: https://stackoverflow.com/questions/69592843/how-to-fetch-image-from-api
 
-        console.log("https://api.adoreanime.com/api/pixiv/?type=illust&id=" + message.content.split("/").pop());
+        const url = "https://api.adoreanime.com/api/pixiv/?type=illust&id=" + message.content.split("/").pop();
 
-        client.channels.cache.get(message.channelId).send(message.content.replace("pixiv", "phixiv"));
-        message.delete();
+        console.log(url);
+
+        let images = [];
+
+        if (json.illust.meta_pages.length == 0) {
+
+            images.push(json.illust.meta_single_page.original_image_url.replace("pximg.net", "pixiv.cat"));
+
+        } else {
+
+            for (const imageUrls of json.illust.meta_pages)
+                images.push(imageUrls.original.replace("pximg.net", "pixiv.cat"));
+        }
+
+        fetchCallback(url, true, (json) => {
+
+            embedArt(client, message, {
+                site: {
+                    name: "Pixiv",
+                    img: "https://static.wikia.nocookie.net/logopedia/images/6/65/Pixiv_2010s_%28Add_icon%29.png",
+                    color: 0x0096FA
+                },
+                title: json.illust.title,
+                description: "By " + json.illust.user.name,
+                url: message.content,
+                images: images
+            });
+        });
     }
 };
 
