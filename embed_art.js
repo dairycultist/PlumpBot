@@ -21,7 +21,7 @@ function attemptEmbedArtFromMessage(client, message) {
                 title: json.title,
                 description: "By " + json.copyright._attributes.entity,
                 url: message.content,
-                images: [ url.type == "video" ? json.thumbnail_url : json.url ] // might be able to parse out video from json.html, check later
+                images: [ json.type == "video" ? json.thumbnail_url : json.url ] // might be able to parse out video from json.html, check later
             });
         });
 
