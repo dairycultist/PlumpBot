@@ -81,19 +81,19 @@ function attemptEmbedArtFromMessage(client, message) {
 
         console.log(url);
 
-        let images = [];
-
-        if (json.illust.meta_pages.length == 0) {
-
-            images.push(json.illust.meta_single_page.original_image_url.replace("pximg.net", "pixiv.cat"));
-
-        } else {
-
-            for (const imageUrls of json.illust.meta_pages)
-                images.push(imageUrls.original.replace("pximg.net", "pixiv.cat"));
-        }
-
         fetchCallback(url, true, (json) => {
+
+            let images = [];
+
+            if (json.illust.meta_pages.length == 0) {
+
+                images.push(json.illust.meta_single_page.original_image_url.replace("pximg.net", "pixiv.cat"));
+
+            } else {
+
+                for (const imageUrls of json.illust.meta_pages)
+                    images.push(imageUrls.original.replace("pximg.net", "pixiv.cat"));
+            }
 
             embedArt(client, message, {
                 site: {
