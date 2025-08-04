@@ -105,6 +105,11 @@ function attemptEmbedArtFromMessage(client, message) {
                 images: images
             });
         });
+
+    } else if (message.content.startsWith("https://www.furaffinity.net/view/")) {
+
+        client.channels.cache.get(message.channelId).send(message.content.replace("furaffinity", "fxfuraffinity"));
+        message.delete();
     }
 };
 
