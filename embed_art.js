@@ -78,6 +78,11 @@ function attemptEmbedArtFromMessage(client, message) {
         const url = "https://api.adoreanime.com/api/pixiv/?type=illust&id=" + message.content.split("/").pop();
         // console.log(url);
 
+        // convert ugoira file to video, then send video file CONTENTS to Discord? then delete locally
+        // https://ugoira.com/
+        // https://github.com/mikf/ugoira-conv
+        // https://codeberg.org/tocariimaa/ugoira-tool
+
         fetchCallback(url, true, (json) => {
 
             let images = [];

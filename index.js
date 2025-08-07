@@ -18,13 +18,26 @@ const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
 		GatewayIntentBits.GuildMessages,
-		GatewayIntentBits.MessageContent
+		GatewayIntentBits.MessageContent,
+        GatewayIntentBits.GuildMembers
     ]
 });
 
 // executed once upon client ready
 client.once(Events.ClientReady, readyClient => {
 	console.log(`Ready! Logged in as ${readyClient.user.tag}`);
+});
+
+// executed upon joining server https://discord.js.org/docs/packages/discord.js/14.21.0/Client:Class#guildMemberAdd
+client.on(Events.GuildMemberAdd, member => {
+
+    console.log(`New member joined: ${ member.user.tag } in ${ member.guild.name }`);
+
+    const welcomeChannel = member.guild.systemChannel;
+
+    if (welcomeChannel) {
+        welcomeChannel.send(`Welcome to the server, ${ member.user.tag }! Please verify by sending your favourite color and a short explanation for why you're here in this channel.`);
+    }
 });
 
 // message handling
