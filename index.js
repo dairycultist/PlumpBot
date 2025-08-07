@@ -29,6 +29,7 @@ client.once(Events.ClientReady, readyClient => {
 });
 
 // executed upon joining server https://discord.js.org/docs/packages/discord.js/14.21.0/Client:Class#guildMemberAdd
+// make sure the bot has permissions to send in the system channel!
 client.on(Events.GuildMemberAdd, member => {
 
     console.log(`New member joined: ${ member.user.tag } in ${ member.guild.name }`);
@@ -36,7 +37,7 @@ client.on(Events.GuildMemberAdd, member => {
     const welcomeChannel = member.guild.systemChannel;
 
     if (welcomeChannel) {
-        welcomeChannel.send(`Welcome to the server, ${ member.user.tag }! Please verify by sending your favourite color and a short explanation for why you're here in this channel.`);
+        welcomeChannel.send(`Welcome to the server, <@${ member.user.id }>! Please verify by sending your favourite color and a short explanation for why you're here in this channel. A moderator will verify you shortly.`);
     }
 });
 
