@@ -219,7 +219,7 @@ function fetchCallback(url, textToJson, callback) {
 
 function embedArt(client, message, response, post) {
 
-    // let examplePost = {
+    // {
     //     site: {
     //         name: "",
     //         img: "",
@@ -235,7 +235,7 @@ function embedArt(client, message, response, post) {
     //         url: "",
     //         local_path: ""
     //     }
-    // };
+    // }
 
     let fields = [];
 
@@ -247,6 +247,8 @@ function embedArt(client, message, response, post) {
             inline: true
         });
     }
+
+    // eventually add video length stat to the embed
 
     const embed = {
         author: {
@@ -263,7 +265,7 @@ function embedArt(client, message, response, post) {
             text: "Sent by " + message.author.displayName,
             icon_url: message.author.avatarURL()
         },
-    }; // eventually add stats to the embed, like video length or image count
+    };
 
     let files = [];
 
