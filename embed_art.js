@@ -96,8 +96,8 @@ const platforms = [
                             img: "https://cdn.bsky.app/img/avatar/plain/did:plc:z72i7hdynmk6r22z27h6tvur/bafkreihagr2cmvl2jt4mgx3sppwe2it3fwolkrbtjrhcnwjk4jdijhsoze@jpeg",
                             color: 0x4F9BD9,
                         },
-                        title: json.posts[0].record.text.split("\n")[0],
-                        description: json.posts[0].record.text,
+                        title: json.posts[0].record.text.length == 0 ? "Post" : json.posts[0].record.text.split("\n")[0], // title is first line of body, or "Post" if no body
+                        description: json.posts[0].record.text.split("\n", 2)[1], // description contains rest of body
                         url: message.content,
                         author: json.posts[0].author.displayName,
                         images: images,
