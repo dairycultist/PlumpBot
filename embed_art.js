@@ -96,9 +96,10 @@ const platforms = [
                             img: "https://cdn.bsky.app/img/avatar/plain/did:plc:z72i7hdynmk6r22z27h6tvur/bafkreihagr2cmvl2jt4mgx3sppwe2it3fwolkrbtjrhcnwjk4jdijhsoze@jpeg",
                             color: 0x4F9BD9,
                         },
-                        title: parseMeta(html, "og:title").replaceAll("&apos;", "'"),
+                        title: json.posts[0].record.text.split("\n")[0],
                         description: json.posts[0].record.text,
                         url: message.content,
+                        author: json.posts[0].author.displayName,
                         images: images,
                         video: {
                             local_path: video_local_path
@@ -187,13 +188,6 @@ async function attemptEmbedArtFromMessage(client, message) {
         }
     }
 };
-
-function parseMeta(html, property) {
-
-    const result = new RegExp(`<meta property="${ property }" content="([^"]*)"(?: data-next-head="")? ?\/?>`).exec(html);
-
-    return result ? result[1] : "";
-}
 
 function parseLink(html, rel) {
 
