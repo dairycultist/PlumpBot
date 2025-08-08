@@ -278,7 +278,8 @@ function embedArt(client, message, response, post) {
     // attach images above the embed if there are multiple
     if (post.images.length > 1) {
 
-        files.push(post.images);
+        for (const image of post.images)
+            files.push(image);
     }
 
     response.edit({
