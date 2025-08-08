@@ -32,7 +32,7 @@ const platforms = [
      * TWITTER / X
      */
     {
-        regex: /a/, // message.content.includes("/status/") && (message.content.startsWith("https://twitter.com/") || message.content.startsWith("https://x.com/"))
+        regex: /^$/, // message.content.includes("/status/") && (message.content.startsWith("https://twitter.com/") || message.content.startsWith("https://x.com/"))
         embed: (message, response) => {
             
             // https://x.com/53hank/status/1951368034310103293
@@ -45,7 +45,7 @@ const platforms = [
      * BSKY
      */
     {
-        regex: /a/, // message.content.includes("/post/") && message.content.startsWith("https://bsky.app/profile/")
+        regex: /^$/, // message.content.includes("/post/") && message.content.startsWith("https://bsky.app/profile/")
         embed: (message, response) => {
             
             fetchCallback(message.content, false, (html) => {
@@ -112,7 +112,7 @@ const platforms = [
      * PIXIV
      */
     {
-        regex: /a/, // message.content.includes("/artworks/") && message.content.startsWith("https://www.pixiv.net/")
+        regex: /^$/, // message.content.includes("/artworks/") && message.content.startsWith("https://www.pixiv.net/")
         embed: (message, response) => {
             
             // API guide: https://stackoverflow.com/questions/69592843/how-to-fetch-image-from-api
@@ -158,7 +158,7 @@ const platforms = [
      * FURAFFINITY
      */
     {
-        regex: /a/, // message.content.startsWith("https://www.furaffinity.net/view/")
+        regex: /^$/, // message.content.startsWith("https://www.furaffinity.net/view/")
         embed: (message, response) => {
 
             response.edit(message.content.replace("furaffinity", "fxfuraffinity"));
@@ -183,6 +183,8 @@ async function attemptEmbedArtFromMessage(client, message) {
             console.log("matched!");
 
             platform.embed(message, response);
+
+            return;
         }
     }
 };
