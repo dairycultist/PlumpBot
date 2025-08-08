@@ -147,9 +147,10 @@ const platforms = [
                         color: 0x0096FA
                     },
                     title: json.illust.title,
-                    description: "By " + json.illust.user.name + " (" + json.illust.page_count + " total images)",
+                    description: "By " + json.illust.user.name,
                     url: message.content,
-                    images: images
+                    images: images,
+                    image_count: json.illust.page_count
                 });
             });
         }
@@ -228,12 +229,24 @@ function embedArt(client, message, response, post) {
     //     description: "",
     //     url: "",
     //     images: [ "", "" ],
+    //     image_count: 2, // the images array may not reflect the actual amount of images in the post if we limited the amount to embed
     //     video: {
     //         length: 10,
     //         url: "",
     //         local_path: ""
     //     }
     // };
+
+    let fields = [];
+
+    if (post.image_count) {
+
+        fields.push({
+            name: "Total images",
+            value: post.image_count,
+            inline: true
+        });
+    }
 
     const embed = {
         author: {
@@ -243,6 +256,7 @@ function embedArt(client, message, response, post) {
         color: post.site.color,
         title: post.title,
         description: post.description,
+        fields: fields,
         url: post.url,
         image: post.images.length == 1 ? { url: post.images[0] } : undefined, // only put an image in the embed if it's the ONLY image
         footer: {
@@ -251,7 +265,7 @@ function embedArt(client, message, response, post) {
         },
     }; // eventually add stats to the embed, like video length or image count
 
-    var files = [];
+    let files = [];
 
     // attach video FILE above embed (video LINK should be set as image of embed)
     if (post.video && post.video.local_path) {
