@@ -58,14 +58,25 @@ function attemptEmbedArtFromMessage(client, message) {
                 var video_local_path = "";
                 var images = [];
 
-                // I think reposts are internally different which is annoying but whatever
+                // reposts are internally different which is annoying but whatever
 
-                if (json.posts[0].record.embed["$type"] == "app.bsky.embed.recordWithMedia") {
+                if (json.posts[0].embed["$type"] == "app.bsky.embed.recordWithMedia#view") {
 
+                    // video post
                     video_local_path = "./bsky.mp4";
 
                     await converter
                         .setInputFile(json.posts[0].embed.media.playlist) // url to M3U8 stream file, converter saves it to mp4 locally
+                        .setOutputFile(video_local_path)
+                        .start();
+
+                } else if (json.posts[0].embed["$type"] == "app.bsky.embed.video#view") {
+
+                    // video REpost
+                    video_local_path = "./bsky.mp4";
+
+                    await converter
+                        .setInputFile(json.posts[0].embed.playlist)
                         .setOutputFile(video_local_path)
                         .start();
 
