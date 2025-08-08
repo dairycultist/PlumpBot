@@ -90,6 +90,14 @@ const platforms = [
                                 images.push(`https://cdn.bsky.app/img/feed_fullsize/plain/${ authorDID }/${ imageObject.image.ref["$link"] }@png`);
                     }
 
+                    let description = json.posts[0].record.text.match(/^.*\n+([\s\S]*)$/);
+
+                    if (description) {
+                        description = description[1]; // get matching group
+                    } else {
+                        description = undefined; // no match, either body is empty or there's only one line (the title)
+                    }
+
                     embedArt(client, message, response, {
                         site: {
                             name: "Bluesky",
@@ -97,7 +105,7 @@ const platforms = [
                             color: 0x4F9BD9,
                         },
                         title: json.posts[0].record.text.length == 0 ? "Post" : json.posts[0].record.text.split("\n", 1)[0], // title is first line of body, or "Post" if no body
-                        description: json.posts[0].record.text.match(/^.*\n+([\s\S]*)$/)[1], // description contains rest of body
+                        description: description,                                                                            // description contains rest of body (or undefined if there is none)
                         url: message.content,
                         author: json.posts[0].author.displayName,
                         images: images,
