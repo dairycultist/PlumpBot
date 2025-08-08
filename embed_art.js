@@ -6,7 +6,7 @@ const platforms = [
      * DEVIANTART
      */
     {
-        regex: /^https:\/\/www.deviantart.com\//,
+        regex: new RegExp("^https://www.deviantart.com/"),
         embed: (client, message, response) => {
             
             const url = "https://backend.deviantart.com/oembed?url=" + message.content.replaceAll(":", "%3A").replaceAll("/", "%2F");
@@ -112,7 +112,7 @@ const platforms = [
      * PIXIV
      */
     {
-        regex: /^$/, // message.content.includes("/artworks/") && message.content.startsWith("https://www.pixiv.net/")
+        regex: new RegExp("https://www.pixiv.net/.+/artworks/"),
         embed: (client, message, response) => {
             
             // API guide: https://stackoverflow.com/questions/69592843/how-to-fetch-image-from-api
@@ -158,7 +158,7 @@ const platforms = [
      * FURAFFINITY
      */
     {
-        regex: /^$/, // message.content.startsWith("https://www.furaffinity.net/view/")
+        regex: new RegExp("^https://www.furaffinity.net/view/"),
         embed: (client, message, response) => {
 
             response.edit(message.content.replace("furaffinity", "fxfuraffinity"));
@@ -173,14 +173,12 @@ async function attemptEmbedArtFromMessage(client, message) {
 
     let response;
 
-    message.delete();
-    response = await client.channels.cache.get(message.channelId).send(`Processing <${ message.content }>`);
-
     for (const platform of platforms) {
 
         if (platform.regex.test(message.content)) {
 
-            console.log("matched!");
+            message.delete();
+            response = await client.channels.cache.get(message.channelId).send(`Processing <${ message.content }>`);
 
             platform.embed(client, message, response);
 
