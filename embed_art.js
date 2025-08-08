@@ -32,7 +32,7 @@ const platforms = [
      * TWITTER / X
      */
     {
-        regex: /^$/, // message.content.includes("/status/") && (message.content.startsWith("https://twitter.com/") || message.content.startsWith("https://x.com/"))
+        regex: new RegExp("^https://(twitter|x).com/.+/status/"),
         embed: (client, message, response) => {
             
             // https://x.com/53hank/status/1951368034310103293
@@ -45,7 +45,7 @@ const platforms = [
      * BSKY
      */
     {
-        regex: /^$/, // message.content.includes("/post/") && message.content.startsWith("https://bsky.app/profile/")
+        regex: new RegExp("^https://bsky.app/profile/.+/post/"),
         embed: (client, message, response) => {
             
             fetchCallback(message.content, false, (html) => {
@@ -112,7 +112,7 @@ const platforms = [
      * PIXIV
      */
     {
-        regex: new RegExp("https://www.pixiv.net/.+/artworks/"),
+        regex: new RegExp("^https://www.pixiv.net/.+/artworks/"),
         embed: (client, message, response) => {
             
             // API guide: https://stackoverflow.com/questions/69592843/how-to-fetch-image-from-api
