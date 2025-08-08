@@ -21,9 +21,9 @@ const platforms = [
                         color: 0x05CC46
                     },
                     title: json.title,
-                    description: "By " + json.copyright._attributes.entity,
                     url: message.content,
-                    images: [ json.type == "video" ? json.thumbnail_url : json.url ] // might be able to parse out video from json.html, check later
+                    author: json.copyright._attributes.entity,
+                    images: [ { attachment: json.type == "video" ? json.thumbnail_url : json.url } ] // might be able to parse out video from json.html, check later
                 });
             });
         }
@@ -87,7 +87,7 @@ const platforms = [
 
                         if (json.posts[0].record.embed.images)
                             for (const imageObject of json.posts[0].record.embed.images)
-                                images.push(`https://cdn.bsky.app/img/feed_fullsize/plain/${ authorDID }/${ imageObject.image.ref["$link"] }@png`);
+                                images.push({ attachment: `https://cdn.bsky.app/img/feed_fullsize/plain/${ authorDID }/${ imageObject.image.ref["$link"] }@png`, name: "image.png" });
                     }
 
                     let description = json.posts[0].record.text.match(/^.*\n+([\s\S]*)$/);
@@ -140,13 +140,13 @@ const platforms = [
 
                 if (json.illust.meta_pages.length == 0) {
 
-                    images.push(json.illust.meta_single_page.original_image_url.replace("pximg.net", "pixiv.cat"));
+                    images.push({ attachment: json.illust.meta_single_page.original_image_url.replace("pximg.net", "pixiv.cat") });
 
                 } else {
 
                     // add images (given there are multiple), but only the first six
                     for (let i = 0; i < Math.min(6, json.illust.meta_pages.length); i++)
-                        images.push(json.illust.meta_pages[i].image_urls.original.replace("pximg.net", "pixiv.cat"));
+                        images.push({ attachment: json.illust.meta_pages[i].image_urls.original.replace("pximg.net", "pixiv.cat") });
                 }
 
                 embedArt(client, message, response, {
@@ -231,7 +231,7 @@ function embedArt(client, message, response, post) {
     //     description: "",
     //     url: "",
     //     author: "",
-    //     images: [ "", "" ],
+    //     images: [ { attachment: "", name: "image.png" } ], // name is optional (not for bsky since they do @png instead of .png)
     //     image_count: 2, // the images array may not reflect the actual amount of images in the post if we limited the amount to embed
     //     video: {
     //         length: 10,
@@ -260,7 +260,7 @@ function embedArt(client, message, response, post) {
         description: post.description,
         fields: fields,
         url: post.url,
-        image: post.images.length == 1 ? { url: post.images[0] } : undefined, // only put an image in the embed if it's the ONLY image
+        image: post.images.length == 1 ? { url: post.images[0].attachment } : undefined, // only put an image in the embed if it's the ONLY image
         footer: {
             text: "Sent by " + message.author.displayName,
             icon_url: message.author.avatarURL()
@@ -278,8 +278,7 @@ function embedArt(client, message, response, post) {
     // attach images above the embed if there are multiple
     if (post.images.length > 1) {
 
-        for (const image of post.images)
-            files.push({ attachment: image });
+        files.push(post.images);
     }
 
     response.edit({
