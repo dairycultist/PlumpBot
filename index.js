@@ -1,3 +1,4 @@
+
 function getToken() {
 
     try {
@@ -10,7 +11,7 @@ function getToken() {
     }
 }
 
-const { Client, Events, GatewayIntentBits, EmbedBuilder } = require("discord.js"); // npm install discord.js
+const { Client, Events, GatewayIntentBits, EmbedBuilder } = require("discord.js");
 const { attemptEmbedArtFromMessage } = require("./embed_art.js");
 const token = getToken();
 const client = new Client({

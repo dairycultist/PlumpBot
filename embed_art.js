@@ -1,9 +1,14 @@
+var m3u8ToMp4 = require("m3u8-to-mp4");
+var converter = new m3u8ToMp4();
 
 function attemptEmbedArtFromMessage(client, message) {
 
     if (message.content.includes(" ")) // no need to trim, Discord does it for us
         return;
 
+    /*
+     * DEVIANTART
+     */
     if (message.content.startsWith("https://www.deviantart.com/")) {
 
         const url = "https://backend.deviantart.com/oembed?url=" + message.content.replaceAll(":", "%3A").replaceAll("/", "%2F");
@@ -24,6 +29,9 @@ function attemptEmbedArtFromMessage(client, message) {
             });
         });
 
+    /*
+     * TWITTER / X
+     */
     } else if (message.content.includes("/status/") && (message.content.startsWith("https://twitter.com/") || message.content.startsWith("https://x.com/"))) {
 
         // https://x.com/53hank/status/1951368034310103293
@@ -32,6 +40,9 @@ function attemptEmbedArtFromMessage(client, message) {
         client.channels.cache.get(message.channelId).send(message.content.replace("x", "fixvx").replace("twitter", "fixvx"));
         message.delete();
 
+    /*
+     * BSKY
+     */
     } else if (message.content.includes("/post/") && message.content.startsWith("https://bsky.app/profile/")) {
 
         fetchCallback(message.content, false, (html) => {
@@ -40,18 +51,21 @@ function attemptEmbedArtFromMessage(client, message) {
             // console.log(url);
 
             // https://docs.bsky.app/docs/api/app-bsky-feed-get-posts
-            fetchCallback(url, true, (json) => {
+            fetchCallback(url, true, async (json) => {
 
                 const authorDID = json.posts[0].author.did.replaceAll(":", "%3A");
 
+                var video_local_path = "";
                 var images = [];
 
                 if (json.posts[0].record.embed["$type"] == "app.bsky.embed.recordWithMedia") {
 
-                    console.log(posts[0].embed.media.playlist); // url to M3U8 stream file, must save to mp4 locally
+                    video_local_path = "./bsky.mp4";
 
-                    // video, just put thumbnail since we don't support bsky video embedding rn
-                    images.push(`https://video.bsky.app/watch/${ authorDID }/${ json.posts[0].record.embed.media.video.ref["$link"] }/thumbnail.jpg`);
+                    await converter
+                        .setInputFile(posts[0].embed.media.playlist) // url to M3U8 stream file, converter saves it to mp4 locally
+                        .setOutputFile(video_local_path)
+                        .start();
 
                 } else {
 
@@ -68,11 +82,17 @@ function attemptEmbedArtFromMessage(client, message) {
                     title: parseMeta(html, "og:title").replaceAll("&apos;", "'"),
                     description: json.posts[0].record.text,
                     url: message.content,
-                    images: images
+                    images: images,
+                    video: {
+                        local_path: video_local_path
+                    }
                 });
             });
         });
 
+    /*
+     * PIXIV
+     */
     } else if (message.content.includes("/artworks/") && message.content.startsWith("https://www.pixiv.net/")) {
 
         // API guide: https://stackoverflow.com/questions/69592843/how-to-fetch-image-from-api
@@ -113,6 +133,9 @@ function attemptEmbedArtFromMessage(client, message) {
             });
         });
 
+    /*
+     * FURAFFINITY
+     */
     } else if (message.content.startsWith("https://www.furaffinity.net/view/")) {
 
         client.channels.cache.get(message.channelId).send(message.content.replace("furaffinity", "fxfuraffinity"));
@@ -184,17 +207,16 @@ function embedArt(client, message, post) {
         },
     };
 
-    var files = undefined;
+    var files = [];
 
     // attach video FILE above embed (video LINK should be set as image of embed)
-    files.push({
-        attachment: "test.mp4"
-    });
+    if (post.video && post.video.local_path) {
+
+        files.push({ attachment: post.video.local_path });
+    }
 
     // attach images above the embed if there are multiple
     if (post.images.length > 1) {
-
-        files = [];
 
         for (const image of post.images)
             files.push({ attachment: image });
