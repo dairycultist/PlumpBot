@@ -1,22 +1,26 @@
 var m3u8ToMp4 = require("m3u8-to-mp4");
 var converter = new m3u8ToMp4();
 
-function attemptEmbedArtFromMessage(client, message) {
+async function attemptEmbedArtFromMessage(client, message) {
 
     if (message.content.includes(" ")) // no need to trim, Discord does it for us
         return;
+
+    let response;
 
     /*
      * DEVIANTART
      */
     if (message.content.startsWith("https://www.deviantart.com/")) {
+        message.delete();
+        response = await client.channels.cache.get(message.channelId).send(`Processing <${ message.content }>`);
 
         const url = "https://backend.deviantart.com/oembed?url=" + message.content.replaceAll(":", "%3A").replaceAll("/", "%2F");
         // console.log(url);
 
         fetchCallback(url, true, (json) => {
 
-            embedArt(client, message, {
+            embedArt(client, message, response, {
                 site: {
                     name: "DeviantArt",
                     img: "https://images.icon-icons.com/2972/PNG/512/deviantart_logo_icon_186874.png",
@@ -33,17 +37,20 @@ function attemptEmbedArtFromMessage(client, message) {
      * TWITTER / X
      */
     } else if (message.content.includes("/status/") && (message.content.startsWith("https://twitter.com/") || message.content.startsWith("https://x.com/"))) {
+        message.delete();
+        response = await client.channels.cache.get(message.channelId).send(`Processing <${ message.content }>`);
 
         // https://x.com/53hank/status/1951368034310103293
         // https://twitter.com/VeryFilthyThing/status/1951406765305676282
         // Twitter embeds don't work right now since Twitter sucks and wants me to poll its API
-        client.channels.cache.get(message.channelId).send(message.content.replace("x", "fixvx").replace("twitter", "fixvx"));
-        message.delete();
+        response.edit(message.content.replace("x", "fixvx").replace("twitter", "fixvx"));
 
     /*
      * BSKY
      */
     } else if (message.content.includes("/post/") && message.content.startsWith("https://bsky.app/profile/")) {
+        message.delete();
+        response = await client.channels.cache.get(message.channelId).send(`Processing <${ message.content }>`);
 
         fetchCallback(message.content, false, (html) => {
 
@@ -87,7 +94,7 @@ function attemptEmbedArtFromMessage(client, message) {
                             images.push(`https://cdn.bsky.app/img/feed_fullsize/plain/${ authorDID }/${ imageObject.image.ref["$link"] }@png`);
                 }
 
-                embedArt(client, message, {
+                embedArt(client, message, response, {
                     site: {
                         name: "Bluesky",
                         img: "https://cdn.bsky.app/img/avatar/plain/did:plc:z72i7hdynmk6r22z27h6tvur/bafkreihagr2cmvl2jt4mgx3sppwe2it3fwolkrbtjrhcnwjk4jdijhsoze@jpeg",
@@ -108,6 +115,8 @@ function attemptEmbedArtFromMessage(client, message) {
      * PIXIV
      */
     } else if (message.content.includes("/artworks/") && message.content.startsWith("https://www.pixiv.net/")) {
+        message.delete();
+        response = await client.channels.cache.get(message.channelId).send(`Processing <${ message.content }>`);
 
         // API guide: https://stackoverflow.com/questions/69592843/how-to-fetch-image-from-api
 
@@ -134,7 +143,7 @@ function attemptEmbedArtFromMessage(client, message) {
                     images.push(json.illust.meta_pages[i].image_urls.original.replace("pximg.net", "pixiv.cat"));
             }
 
-            embedArt(client, message, {
+            embedArt(client, message, response, {
                 site: {
                     name: "Pixiv",
                     img: "https://static.wikia.nocookie.net/logopedia/images/6/65/Pixiv_2010s_%28Add_icon%29.png",
@@ -151,9 +160,10 @@ function attemptEmbedArtFromMessage(client, message) {
      * FURAFFINITY
      */
     } else if (message.content.startsWith("https://www.furaffinity.net/view/")) {
-
-        client.channels.cache.get(message.channelId).send(message.content.replace("furaffinity", "fxfuraffinity"));
         message.delete();
+        response = await client.channels.cache.get(message.channelId).send(`Processing <${ message.content }>`);
+
+        response.edit(message.content.replace("furaffinity", "fxfuraffinity"));
     }
 };
 
@@ -186,7 +196,7 @@ function fetchCallback(url, textToJson, callback) {
     .catch(error => console.error("There was a problem fetching: ", error));
 }
 
-function embedArt(client, message, post) {
+function embedArt(client, message, response, post) {
 
     // let examplePost = {
     //     site: {
@@ -219,7 +229,7 @@ function embedArt(client, message, post) {
             text: "Sent by " + message.author.displayName,
             icon_url: message.author.avatarURL()
         },
-    };
+    }; // eventually add stats to the embed, like video length or image count
 
     var files = [];
 
@@ -236,14 +246,10 @@ function embedArt(client, message, post) {
             files.push({ attachment: image });
     }
 
-    client.channels.cache.get(message.channelId).send({
+    response.edit({
         embeds: [ embed ],
         files: files
     });
-    message.delete();
-
-    // TODO for posts that contain video, multiple images, or extended media in general, create a read-only thread and post them there (to prevent clutter)
-    // maybe add stats to the embed, like video length or image count
 }
 
 module.exports = {
