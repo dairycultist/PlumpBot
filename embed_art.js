@@ -6,7 +6,7 @@ const platforms = [
      * DEVIANTART
      */
     {
-        regex: /a/, // message.content.startsWith("https://www.deviantart.com/")
+        regex: /^https:\/\/www.deviantart.com\//,
         embed: (message, response) => {
             
             const url = "https://backend.deviantart.com/oembed?url=" + message.content.replaceAll(":", "%3A").replaceAll("/", "%2F");
@@ -175,6 +175,16 @@ async function attemptEmbedArtFromMessage(client, message) {
 
     message.delete();
     response = await client.channels.cache.get(message.channelId).send(`Processing <${ message.content }>`);
+
+    for (const platform of platforms) {
+
+        if (platform.regex.test(message.content)) {
+
+            console.log("matched!");
+
+            platform.embed(message, response);
+        }
+    }
 };
 
 function parseMeta(html, property) {
