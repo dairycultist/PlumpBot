@@ -97,7 +97,7 @@ const platforms = [
                             color: 0x4F9BD9,
                         },
                         title: json.posts[0].record.text.length == 0 ? "Post" : json.posts[0].record.text.split("\n", 1)[0], // title is first line of body, or "Post" if no body
-                        description: json.posts[0].record.text.match(/^\n+(.*)$/)[1], // description contains rest of body
+                        description: json.posts[0].record.text.match(/^.*\n+([\s\S]*)$/)[1], // description contains rest of body
                         url: message.content,
                         author: json.posts[0].author.displayName,
                         images: images,
