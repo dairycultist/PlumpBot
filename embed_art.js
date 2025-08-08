@@ -147,8 +147,8 @@ const platforms = [
                         color: 0x0096FA
                     },
                     title: json.illust.title,
-                    description: "By " + json.illust.user.name,
                     url: message.content,
+                    author: json.illust.user.name,
                     images: images,
                     image_count: json.illust.page_count
                 });
@@ -228,6 +228,7 @@ function embedArt(client, message, response, post) {
     //     title: "",
     //     description: "",
     //     url: "",
+    //     author: "",
     //     images: [ "", "" ],
     //     image_count: 2, // the images array may not reflect the actual amount of images in the post if we limited the amount to embed
     //     video: {
@@ -239,14 +240,11 @@ function embedArt(client, message, response, post) {
 
     let fields = [];
 
-    if (post.image_count) {
+    if (post.author)
+        fields.push({ name: "Author", value: post.author, inline: true });
 
-        fields.push({
-            name: "Total images",
-            value: post.image_count,
-            inline: true
-        });
-    }
+    if (post.image_count)
+        fields.push({ name: "Total images", value: post.image_count, inline: true });
 
     // eventually add video length stat to the embed
 
