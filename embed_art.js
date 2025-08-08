@@ -48,6 +48,8 @@ function attemptEmbedArtFromMessage(client, message) {
 
                 if (json.posts[0].record.embed["$type"] == "app.bsky.embed.recordWithMedia") {
 
+                    console.log(posts[0].embed.media.playlist); // url to M3U8 stream file, must save to mp4 locally
+
                     // video, just put thumbnail since we don't support bsky video embedding rn
                     images.push(`https://video.bsky.app/watch/${ authorDID }/${ json.posts[0].record.embed.media.video.ref["$link"] }/thumbnail.jpg`);
 
@@ -161,7 +163,8 @@ function embedArt(client, message, post) {
     //     images: [ "", "" ],
     //     video: {
     //         length: 10,
-    //         url: ""
+    //         url: "",
+    //         local_path: ""
     //     }
     // };
 
@@ -183,13 +186,18 @@ function embedArt(client, message, post) {
 
     var files = undefined;
 
+    // attach video FILE above embed (video LINK should be set as image of embed)
+    files.push({
+        attachment: "test.mp4"
+    });
+
     // attach images above the embed if there are multiple
     if (post.images.length > 1) {
 
         files = [];
 
         for (const image of post.images)
-            files.push({ attachment: image, name: "image.png" }); // currently assuming the attachment is a png. this works for bsky since we get to choose (@png in url), but might be unstable later
+            files.push({ attachment: image });
     }
 
     client.channels.cache.get(message.channelId).send({
