@@ -66,38 +66,45 @@ client.on(Events.MessageCreate, message => {
 });
 
 // asynchronously deploy commands via rest module
-(async () => {
-	try {
+const redeploy = require("readline-sync").question("Should we redeploy commands? (May be throttled if you do it too often) [y/N]");
 
-        const commands = [
-            new SlashCommandBuilder()
-                .setName("draw")
-                .setDescription("Generate an image using Paperspace.")
-                .addStringOption(option => option.setName("pos").setDescription("Positive prompt.").setRequired(true))
-                .addStringOption(option => option.setName("size").setDescription("Resulting image size.").setRequired(true).addChoices(
-                    { name: '1200x1200', value: "square" },
-                    { name: '1000x1600', value: "tall" },
-                    { name: '1600x1000', value: "wide" }
-                ))
-                .toJSON()
-        ];
+console.log(redeploy);
 
-        const rest = new REST().setToken(token);
+if (redeploy.trim().toLowerCase() == "y") {
 
-		console.log(`Started refreshing ${ commands.length } application (/) commands.`);
+    (async () => {
+        try {
 
-		// the put method is used to fully refresh all commands in the guild with the current set
-		const data = await rest.put(
-			Routes.applicationCommands(clientID),
-			{ body: commands },
-		);
+            const commands = [
+                new SlashCommandBuilder()
+                    .setName("draw")
+                    .setDescription("Generate an image using Paperspace.")
+                    .addStringOption(option => option.setName("pos").setDescription("Positive prompt.").setRequired(true))
+                    .addStringOption(option => option.setName("size").setDescription("Resulting image size.").setRequired(true).addChoices(
+                        { name: '1200x1200', value: "square" },
+                        { name: '1000x1600', value: "tall" },
+                        { name: '1600x1000', value: "wide" }
+                    ))
+                    .toJSON()
+            ];
 
-		console.log(`Successfully reloaded ${ data.length } application (/) commands.`);
+            const rest = new REST().setToken(token);
 
-	} catch (error) {
-		console.error(error);
-	}
-})();
+            console.log(`Started refreshing ${ commands.length } application (/) commands.`);
+
+            // the put method is used to fully refresh all commands in the guild with the current set
+            const data = await rest.put(
+                Routes.applicationCommands(clientID),
+                { body: commands },
+            );
+
+            console.log(`Successfully reloaded ${ data.length } application (/) commands.`);
+
+        } catch (error) {
+            console.error(error);
+        }
+    })();
+}
 
 // start bot
 client.login(token);
