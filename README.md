@@ -2,8 +2,6 @@
 
 A Discord bot for my awesome Discord server.
 
-[Slash commands guide](https://discordjs.guide/creating-your-bot/slash-commands.html)
-
 ## Dependencies
 
 I'm assuming you're using the Ubuntu package manager `apt` since that's what I'm using.

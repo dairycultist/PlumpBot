@@ -11,7 +11,7 @@ function getToken() {
     }
 }
 
-const { Client, Events, GatewayIntentBits, EmbedBuilder } = require("discord.js");
+const { Client, Collection, Events, GatewayIntentBits, MessageFlags, EmbedBuilder, SlashCommandBuilder, REST, Routes } = require("discord.js");
 const { attemptEmbedArtFromMessage } = require("./embed_art.js");
 const token = getToken();
 const client = new Client({
@@ -42,6 +42,39 @@ client.on(Events.GuildMemberAdd, member => {
     }
 });
 
+// command handling https://discordjs.guide/creating-your-bot/slash-commands.html
+client.on(Events.InteractionCreate, async interaction => {
+
+    // new SlashCommandBuilder()
+    //         .setName("ping")
+    // 		.setDescription("Replies with Pong!");
+
+	if (!interaction.isChatInputCommand()) return;
+
+	console.log(interaction);
+
+    const command = interaction.client.commands.get(interaction.commandName);
+
+	if (!command) {
+		console.error(`No command matching ${interaction.commandName} was found.`);
+		return;
+	}
+
+	try {
+
+		await command.execute(interaction);
+
+	} catch (error) {
+
+		console.error(error);
+		if (interaction.replied || interaction.deferred) {
+			await interaction.followUp({ content: 'There was an error while executing this command!', flags: MessageFlags.Ephemeral });
+		} else {
+			await interaction.reply({ content: 'There was an error while executing this command!', flags: MessageFlags.Ephemeral });
+		}
+	}
+});
+
 // message handling
 client.on(Events.MessageCreate, message => {
 
@@ -49,6 +82,38 @@ client.on(Events.MessageCreate, message => {
 
     attemptEmbedArtFromMessage(client, message);
 });
+
+// asynchronously deploy commands via rest module
+(async () => {
+	try {
+
+        const commands = [
+            {
+                data: new SlashCommandBuilder()
+                    .setName("ping")
+                    .setDescription("Replies with Pong!"),
+                async execute(interaction) {
+                    await interaction.reply("Pong!");
+                },
+            }.toJSON()
+        ];
+
+        const rest = new REST().setToken(token);
+
+		console.log(`Started refreshing ${ commands.length } application (/) commands.`);
+
+		// the put method is used to fully refresh all commands in the guild with the current set
+		const data = await rest.put(
+			Routes.applicationGuildCommands("640580697534365697"), // client id (should put into config)
+			{ body: commands },
+		);
+
+		console.log(`Successfully reloaded ${ data.length } application (/) commands.`);
+
+	} catch (error) {
+		console.error(error);
+	}
+})();
 
 // start bot
 client.login(token);
