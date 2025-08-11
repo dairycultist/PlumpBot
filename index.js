@@ -46,15 +46,25 @@ client.on(Events.GuildMemberAdd, member => {
 // command handling https://discordjs.guide/creating-your-bot/slash-commands.html
 client.on(Events.InteractionCreate, async interaction => {
 
-    // new SlashCommandBuilder()
-    //         .setName("ping")
-    // 		.setDescription("Replies with Pong!");
-
 	if (!interaction.isChatInputCommand()) return;
 
-	console.log(interaction);
+    if (interaction.commandName == "draw") {
 
-    await interaction.reply({ content: interaction.commandName, flags: MessageFlags.Ephemeral });
+        const argArr = interaction.options._hoistedOptions;
+
+        const pos = argArr.find((arg) => arg.name == "pos").value;
+        const size = argArr.find((arg) => arg.name == "size").value;
+
+        console.log("New generation:");
+        console.log("  Pos:" + pos);
+        console.log("  Size:" + size);
+
+        await interaction.reply({ content: "This isn't implemented yet lol", flags: MessageFlags.Ephemeral });
+
+    } else {
+
+        await interaction.reply({ content: "Command doesn't exist!", flags: MessageFlags.Ephemeral });
+    }
 });
 
 // message handling
