@@ -146,8 +146,8 @@ if (redeploy.trim().toLowerCase() == "y") {
             const commands = [
                 new SlashCommandBuilder()
                     .setName("setgradioid")
-                    .setDescription("Set the ID of the gradio sharelink to make requests to. Run without arguments to clear the gradio ID.")
-                    .addStringOption(option => option.setName("id").setDescription("https://<THIS_PART>.gradio.live/"))
+                    .setDescription("Set (or clear) the ID of the gradio sharelink to make requests to.")
+                    .addStringOption(option => option.setName("id").setDescription("https://<THIS_PART>.gradio.live/ OR leave empty to clear gradio ID."))
                     .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers)
                     .toJSON()
                 ,
