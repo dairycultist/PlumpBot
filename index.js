@@ -52,7 +52,10 @@ client.on(Events.InteractionCreate, async interaction => {
 	if (!interaction.isChatInputCommand()) return;
 
     const getArgValue = (name) => {
-        return interaction.options._hoistedOptions.find((arg) => arg.name == name).value;
+        
+        const argument = interaction.options._hoistedOptions.find((arg) => arg.name == name);
+
+        return argument ? argument.value : undefined;
     };
 
     if (interaction.commandName == "setgradioid") {
