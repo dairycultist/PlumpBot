@@ -72,13 +72,14 @@ client.on(Events.MessageCreate, message => {
         const commands = [
             new SlashCommandBuilder()
                 .setName("draw")
-                .setDescription("Generate an image using Paperspace.").toJSON()
+                .setDescription("Generate an image using Paperspace.")
                 .addStringOption(option => option.setName("pos").setDescription("Positive prompt.").setRequired(true))
                 .addStringOption(option => option.setName("size").setDescription("Resulting image size.").setRequired(true).addChoices(
                     { name: '1200x1200', value: "square" },
                     { name: '1000x1600', value: "tall" },
                     { name: '1600x1000', value: "wide" }
                 ))
+                .toJSON()
         ];
 
         const rest = new REST().setToken(token);
