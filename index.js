@@ -91,12 +91,16 @@ client.on(Events.InteractionCreate, async interaction => {
                 "prompt": getArgValue("pos"),
                 "negative_prompt": getArgValue("neg"),
                 "seed": -1,
+                // sampler_name: null,
+                // scheduler: null,
                 "batch_size": 1,
                 "steps": 30,
+                // cfg_scale: 7,
                 "width": getArgValue("size") ? parseInt(getArgValue("size").split("x")[0]) : 1200,
                 "height": getArgValue("size") ? parseInt(getArgValue("size").split("x")[1]) : 1200,
+                // "sampler_index": "Euler",
                 "send_images": true,
-                "save_images": true
+                "save_images": false
             })
         })
         .then(response => {
@@ -108,9 +112,7 @@ client.on(Events.InteractionCreate, async interaction => {
         })
         .then(json => {
 
-            console.log(json);
-
-            // finally update our response
+            // update our response with the image
             interaction.editReply({ files: [ new AttachmentBuilder(Buffer.from(json.images[0], "base64"), { name: "image.png" }) ] });
         })
         .catch(error => {
