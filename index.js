@@ -1,19 +1,20 @@
 
-function getToken() {
+function getConfig() {
 
     try {
-        return require("../config.json").token;
+        return require("../config.json");
     } catch (error) {
         console.error("Please run:");
-        console.error("echo '{ \"token\": \"<YOUR_TOKEN>\" }' > ../config.json");
-        console.error("with the appropriate key! Find your key by going to https://discord.com/developers/applications, selecting your app, selecting 'Bot' on the sidebar, and selecting 'Reset Token.'");
+        console.error("echo '{ \"token\": \"<YOUR_TOKEN>\", \"clientID\": \"<YOUR_CLIENT_ID>\" }' > ../config.json");
+        console.error("Key: Go to https://discord.com/developers/applications, select your app, select 'Bot' on the sidebar, and select 'Reset Token.'");
+        console.error("Client ID: Go to https://discord.com/developers/applications, select your app, select 'General Information' on the sidebar, and copy the 'Application ID.'");
         process.exit(1);
     }
 }
 
 const { Client, Collection, Events, GatewayIntentBits, MessageFlags, EmbedBuilder, SlashCommandBuilder, REST, Routes } = require("discord.js");
 const { attemptEmbedArtFromMessage } = require("./embed_art.js");
-const token = getToken();
+const { token, clientID } = getConfig();
 const client = new Client({
     // https://discordjs.guide/popular-topics/intents.html#privileged-intents
     intents: [
@@ -80,7 +81,7 @@ client.on(Events.MessageCreate, message => {
 
 		// the put method is used to fully refresh all commands in the guild with the current set
 		const data = await rest.put(
-			Routes.applicationCommands("640580697534365697"), // client id (should put into config)
+			Routes.applicationCommands(clientID),
 			{ body: commands },
 		);
 
