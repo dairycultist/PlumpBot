@@ -92,10 +92,10 @@ client.on(Events.MessageCreate, message => {
                 data: new SlashCommandBuilder()
                     .setName("ping")
                     .setDescription("Replies with Pong!"),
-                async execute(interaction) {
+                execute: async (interaction) => {
                     await interaction.reply("Pong!");
                 },
-            }.toJSON()
+            }
         ];
 
         const rest = new REST().setToken(token);
@@ -104,7 +104,7 @@ client.on(Events.MessageCreate, message => {
 
 		// the put method is used to fully refresh all commands in the guild with the current set
 		const data = await rest.put(
-			Routes.applicationGuildCommands("640580697534365697"), // client id (should put into config)
+			Routes.applicationCommands("640580697534365697"), // client id (should put into config)
 			{ body: commands },
 		);
 
