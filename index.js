@@ -50,14 +50,14 @@ client.on(Events.InteractionCreate, async interaction => {
 
     if (interaction.commandName == "draw") {
 
-        const argArr = interaction.options._hoistedOptions;
+        const getArgValue = (name) => {
 
-        const pos = argArr.find((arg) => arg.name == "pos").value;
-        const size = argArr.find((arg) => arg.name == "size").value;
+            return interaction.options._hoistedOptions.find((arg) => arg.name == name).value;
+        };
 
         console.log("New generation:");
-        console.log("  Pos:" + pos);
-        console.log("  Size:" + size);
+        console.log("  Pos:" + getArgValue("pos"));
+        console.log("  Size:" + getArgValue("size"));
 
         await interaction.reply({ content: "This isn't implemented yet lol", flags: MessageFlags.Ephemeral });
 
