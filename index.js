@@ -12,7 +12,7 @@ function getConfig() {
     }
 }
 
-const { Client, Collection, Events, GatewayIntentBits, MessageFlags, EmbedBuilder, SlashCommandBuilder, REST, Routes } = require("discord.js");
+const { Client, Collection, Events, GatewayIntentBits, MessageFlags, EmbedBuilder, SlashCommandBuilder, PermissionFlagsBits, REST, Routes } = require("discord.js");
 const { attemptEmbedArtFromMessage } = require("./embed_art.js");
 const { token, clientID } = getConfig();
 const client = new Client({
@@ -44,22 +44,38 @@ client.on(Events.GuildMemberAdd, member => {
 });
 
 // command handling https://discordjs.guide/creating-your-bot/slash-commands.html
+// text to image endpoint <SESSION>.gradio.live/docs#/default/text2imgapi_sdapi_v1_txt2img_post
 client.on(Events.InteractionCreate, async interaction => {
+
+//     {
+//   "prompt": "cat",
+//   "seed": -1,
+//   "batch_size": 1,
+//   "steps": 30,
+//   "width": 512,
+//   "height": 512,
+//   "send_images": true,
+//   "save_images": true
+// }
 
 	if (!interaction.isChatInputCommand()) return;
 
-    if (interaction.commandName == "draw") {
+    const getArgValue = (name) => {
+        return interaction.options._hoistedOptions.find((arg) => arg.name == name).value;
+    };
 
-        const getArgValue = (name) => {
+    if (interaction.commandName == "setgradioid") {
 
-            return interaction.options._hoistedOptions.find((arg) => arg.name == name).value;
-        };
+        await interaction.reply({ content: `Set gradio link to https://${ getArgValue("id") }.gradio.live/`, flags: MessageFlags.Ephemeral });
 
-        console.log("New generation:");
-        console.log("  Pos:" + getArgValue("pos"));
-        console.log("  Size:" + getArgValue("size"));
+    } else if (interaction.commandName == "draw") {
 
-        await interaction.reply({ content: "This isn't implemented yet lol", flags: MessageFlags.Ephemeral });
+        await interaction.deferReply();
+        await wait(4_000);
+		await interaction.editReply({ content: "After API responds this will contain the image" });
+
+        // console.log("  Pos:" + getArgValue("pos"));
+        // console.log("  Size:" + getArgValue("size"));
 
     } else {
 
@@ -86,6 +102,13 @@ if (redeploy.trim().toLowerCase() == "y") {
         try {
 
             const commands = [
+                new SlashCommandBuilder()
+                    .setName("setgradioid")
+                    .setDescription("Set the ID of the gradio sharelink to make requests to.")
+                    .addStringOption(option => option.setName("id").setDescription("https://<THIS_PART>.gradio.live/").setRequired(true))
+                    .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers)
+                    .toJSON()
+                ,
                 new SlashCommandBuilder()
                     .setName("draw")
                     .setDescription("Generate an image using Paperspace.")
