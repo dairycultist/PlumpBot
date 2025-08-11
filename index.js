@@ -45,7 +45,7 @@ client.on(Events.GuildMemberAdd, member => {
 
 // command handling https://discordjs.guide/creating-your-bot/slash-commands.html
 // text to image endpoint <SESSION>.gradio.live/docs#/default/text2imgapi_sdapi_v1_txt2img_post
-let gradioID = "d0fcf20235e26ae84e";
+let gradioID = undefined;
 
 client.on(Events.InteractionCreate, async interaction => {
 
@@ -61,9 +61,21 @@ client.on(Events.InteractionCreate, async interaction => {
     if (interaction.commandName == "setgradioid") {
 
         gradioID = getArgValue("id");
-        await interaction.reply({ content: `Set gradio link to https://${ gradioID }.gradio.live/`, flags: MessageFlags.Ephemeral });
+
+        if (gradioID) {
+            await interaction.reply({ content: `Set gradio link to https://${ gradioID }.gradio.live/`, flags: MessageFlags.Ephemeral });
+        } else {
+            await interaction.reply({ content: `Cleared gradio link.`, flags: MessageFlags.Ephemeral });
+        }
 
     } else if (interaction.commandName == "draw") {
+
+        // if a gradio ID isn't even set, there's no chance the API request will work
+        if (!gradioID) {
+
+            await interaction.reply({ content: "Drawing is currently offline. Ping the owner to have them set it up.", flags: MessageFlags.Ephemeral });
+            return;
+        }
 
         // tell Discord to wait
         await interaction.deferReply();
@@ -87,7 +99,7 @@ client.on(Events.InteractionCreate, async interaction => {
         .then(response => {
 
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${ response.status }`);
+                throw new Error(response.status);
             }
             return response.json();
         })
@@ -99,7 +111,7 @@ client.on(Events.InteractionCreate, async interaction => {
             interaction.editReply({ files: [ new AttachmentBuilder(Buffer.from(json.images[0], "base64"), { name: "image.png" }) ] });
         })
         .catch(error => {
-            interaction.editReply(`**Error:**\`\n${ error }\``);
+            interaction.editReply({ content: error + " Drawing is misconfigured (the server might be up but the bot is currently pointing to the wrong address). Ping the owner so they can fix it!", flags: MessageFlags.Ephemeral });
         });
 
     } else {
@@ -129,8 +141,8 @@ if (redeploy.trim().toLowerCase() == "y") {
             const commands = [
                 new SlashCommandBuilder()
                     .setName("setgradioid")
-                    .setDescription("Set the ID of the gradio sharelink to make requests to.")
-                    .addStringOption(option => option.setName("id").setDescription("https://<THIS_PART>.gradio.live/").setRequired(true))
+                    .setDescription("Set the ID of the gradio sharelink to make requests to. Run without arguments to clear the gradio ID.")
+                    .addStringOption(option => option.setName("id").setDescription("https://<THIS_PART>.gradio.live/"))
                     .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers)
                     .toJSON()
                 ,
