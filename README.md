@@ -12,10 +12,11 @@ sudo apt install nodejs npm
 npm install discord.js
 sudo apt install ffmpeg
 npm install m3u8-to-mp4
+npm install readline-sync
 ```
 
 ## Paperspace and WebUI API
 
 The `/draw` command interacts with a Paperspace notebook (which you can set up with [this tutorial](https://github.com/dairycultist/PaperspaceStableDiffusion)).
 
-Make sure to run `./webui.sh --api` instead of `./webui.sh` to enable the API endpoints.
+Make sure to run `./webui.sh --api` instead of `./webui.sh` when starting the WebUI to enable the API endpoints.
