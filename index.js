@@ -112,6 +112,9 @@ client.on(Events.InteractionCreate, async interaction => {
         })
         .then(json => {
 
+            console.log("TODO include this as metadata in the image:");
+            console.log(json.info);
+
             // update our response with the image
             interaction.editReply({ files: [ new AttachmentBuilder(Buffer.from(json.images[0], "base64"), { name: "image.png" }) ] });
         })
