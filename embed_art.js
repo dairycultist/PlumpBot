@@ -121,7 +121,7 @@ const platforms = [
      * PIXIV
      */
     {
-        regex: new RegExp("^https://www.pixiv.net/.+/artworks/"),
+        regex: new RegExp("^https://www.pixiv.net(/.+)?/artworks/"),
         embed: (client, message, response) => {
             
             // API guide: https://stackoverflow.com/questions/69592843/how-to-fetch-image-from-api

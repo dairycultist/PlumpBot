@@ -119,7 +119,7 @@ client.on(Events.InteractionCreate, async interaction => {
             interaction.editReply({ files: [ new AttachmentBuilder(Buffer.from(json.images[0], "base64"), { name: "image.png" }) ] });
         })
         .catch(error => {
-            interaction.editReply({ content: error + " Drawing is misconfigured (the server might be up but the bot is currently pointing to the wrong address). Ping the owner so they can fix it!", flags: MessageFlags.Ephemeral });
+            interaction.editReply(`Something went wrong (${ error }), please try again. If this *keeps happening*, ping the owner.`);
         });
 
     } else {
