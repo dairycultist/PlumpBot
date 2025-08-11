@@ -43,8 +43,11 @@ client.on(Events.GuildMemberAdd, member => {
     }
 });
 
+// mini goal is to have the bot take in a paperspace key as part of the config, and having a "start drawing backend" and "stop drawing backend" command, creating the notebook, starting it, and storing the gradio link
+// then we can remove the slightly cumbersome setgradioid command, and I also don't have to open paperspace to start the drawing
+
 // command handling https://discordjs.guide/creating-your-bot/slash-commands.html
-// text to image endpoint <SESSION>.gradio.live/docs#/default/text2imgapi_sdapi_v1_txt2img_post
+// text to image endpoint <GRADIO_LIVE_URL>/docs#/default/text2imgapi_sdapi_v1_txt2img_post
 let gradioID = undefined;
 
 client.on(Events.InteractionCreate, async interaction => {
