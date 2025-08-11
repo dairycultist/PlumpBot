@@ -46,9 +46,14 @@ client.on(Events.GuildMemberAdd, member => {
 // mini goal is to have the bot take in a paperspace key as part of the config, and having a "start drawing backend" and "stop drawing backend" command, creating the notebook, starting it, and storing the gradio link
 // then we can remove the slightly cumbersome setgradioid command, and I also don't have to open paperspace to start the drawing
 
+// AI image commands can be run in any channel right now
+// add a /allow and /disallow command to tell the bot where you can gen (that also means I need non-volatile storage server-side, ugh)
+// it'll default to disallowed
+
 // command handling https://discordjs.guide/creating-your-bot/slash-commands.html
 // text to image endpoint <GRADIO_LIVE_URL>/docs#/default/text2imgapi_sdapi_v1_txt2img_post
 let gradioID = undefined;
+let gradioPingInterval = undefined;
 
 client.on(Events.InteractionCreate, async interaction => {
 
@@ -63,12 +68,26 @@ client.on(Events.InteractionCreate, async interaction => {
 
     if (interaction.commandName == "setgradioid") {
 
+        // clear the ping interval (for preventing inactivity) if it exists
+        if (gradioPingInterval)
+            clearInterval(gradioPingInterval);
+
+        // appropriately set gradio ID
         gradioID = getArgValue("id");
 
         if (gradioID) {
-            await interaction.reply({ content: `Set gradio link to https://${ gradioID }.gradio.live/`, flags: MessageFlags.Ephemeral });
+
+            await interaction.reply({ content: `Set gradio link to https://${ gradioID }.gradio.live/ and pinging backend every minute to prevent inactivity.`, flags: MessageFlags.Ephemeral });
+
+            gradioPingInterval = setInterval(function() {
+
+                fetch(`https://${ gradioID }.gradio.live/internal/ping`);
+
+            }, 1000 * 60);
+
         } else {
-            await interaction.reply({ content: `Cleared gradio link.`, flags: MessageFlags.Ephemeral });
+
+            await interaction.reply({ content: `Cleared gradio link and stopped backend ping.`, flags: MessageFlags.Ephemeral });
         }
 
     } else if (interaction.commandName == "draw") {
