@@ -2,6 +2,12 @@
 
 A Discord bot for my awesome Discord server.
 
+## Features
+
+- Converts DeviantArt, Pixiv, Bluesky, Twitter/X, and Furaffinity links to embeds.
+- AI art generation (with separate Paperspace backend).
+- Simple welcome command with verification message.
+
 ## Dependencies
 
 I'm assuming you're using the Ubuntu package manager `apt` since that's what I'm using.

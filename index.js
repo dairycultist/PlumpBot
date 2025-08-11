@@ -166,7 +166,7 @@ if (redeploy.trim().toLowerCase() == "y") {
 
             const rest = new REST().setToken(token);
 
-            console.log(`Started refreshing ${ commands.length } application (/) commands.`);
+            console.log(`Started refreshing ${ commands.length } commands.`);
 
             // the put method is used to fully refresh all commands in the guild with the current set
             const data = await rest.put(
@@ -174,7 +174,7 @@ if (redeploy.trim().toLowerCase() == "y") {
                 { body: commands },
             );
 
-            console.log(`Successfully reloaded ${ data.length } application (/) commands.`);
+            console.log(`Successfully reloaded ${ data.length } commands.`);
 
         } catch (error) {
             console.error(error);
