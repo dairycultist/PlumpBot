@@ -45,6 +45,8 @@ client.on(Events.GuildMemberAdd, member => {
 
 // command handling https://discordjs.guide/creating-your-bot/slash-commands.html
 // text to image endpoint <SESSION>.gradio.live/docs#/default/text2imgapi_sdapi_v1_txt2img_post
+let gradioID = "d0fcf20235e26ae84e";
+
 client.on(Events.InteractionCreate, async interaction => {
 
 	if (!interaction.isChatInputCommand()) return;
@@ -55,7 +57,8 @@ client.on(Events.InteractionCreate, async interaction => {
 
     if (interaction.commandName == "setgradioid") {
 
-        await interaction.reply({ content: `Set gradio link to https://${ getArgValue("id") }.gradio.live/`, flags: MessageFlags.Ephemeral });
+        gradioID = getArgValue("id");
+        await interaction.reply({ content: `Set gradio link to https://${ gradioID }.gradio.live/`, flags: MessageFlags.Ephemeral });
 
     } else if (interaction.commandName == "draw") {
 
@@ -63,16 +66,17 @@ client.on(Events.InteractionCreate, async interaction => {
         await interaction.deferReply();
         
         // do API request
-        fetch(`https://d0fcf20235e26ae84e.gradio.live/sdapi/v1/txt2img`, {
+        fetch(`https://${ gradioID }.gradio.live/sdapi/v1/txt2img`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 "prompt": getArgValue("pos"),
+                "negative_prompt": getArgValue("neg"),
                 "seed": -1,
                 "batch_size": 1,
                 "steps": 30,
-                "width": getArgValue("size") == "tall" ? 1000 : getArgValue("size") == "wide" ? 1600 : 1200,
-                "height": getArgValue("size") == "tall" ? 1600 : getArgValue("size") == "wide" ? 1000 : 1200,
+                "width": getArgValue("size") ? parseInt(getArgValue("size").split("x")[0]) : 1200,
+                "height": getArgValue("size") ? parseInt(getArgValue("size").split("x")[1]) : 1200,
                 "send_images": true,
                 "save_images": true
             })
@@ -131,10 +135,11 @@ if (redeploy.trim().toLowerCase() == "y") {
                     .setName("draw")
                     .setDescription("Generate an image using Paperspace.")
                     .addStringOption(option => option.setName("pos").setDescription("Positive prompt.").setRequired(true))
-                    .addStringOption(option => option.setName("size").setDescription("Resulting image size.").setRequired(true).addChoices(
-                        { name: '1200x1200', value: "square" },
-                        { name: '1000x1600', value: "tall" },
-                        { name: '1600x1000', value: "wide" }
+                    .addStringOption(option => option.setName("neg").setDescription("Negative prompt."))
+                    .addStringOption(option => option.setName("size").setDescription("Resulting image size (defaults to square).").addChoices(
+                        { name: "square", value: "1200x1200" },
+                        { name: "tall", value: "1000x1600" },
+                        { name: "wide", value: "1600x1000" }
                     ))
                     .toJSON()
             ];
