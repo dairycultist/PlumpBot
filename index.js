@@ -12,7 +12,7 @@ function getConfig() {
     }
 }
 
-const { Client, Collection, Events, GatewayIntentBits, MessageFlags, EmbedBuilder, SlashCommandBuilder, PermissionFlagsBits, REST, Routes } = require("discord.js");
+const { Client, Collection, Events, GatewayIntentBits, MessageFlags, EmbedBuilder, SlashCommandBuilder, PermissionFlagsBits, REST, Routes, AttachmentBuilder } = require("discord.js");
 const { attemptEmbedArtFromMessage } = require("./embed_art.js");
 const { token, clientID } = getConfig();
 const client = new Client({
@@ -47,17 +47,6 @@ client.on(Events.GuildMemberAdd, member => {
 // text to image endpoint <SESSION>.gradio.live/docs#/default/text2imgapi_sdapi_v1_txt2img_post
 client.on(Events.InteractionCreate, async interaction => {
 
-//     {
-//   "prompt": "cat",
-//   "seed": -1,
-//   "batch_size": 1,
-//   "steps": 30,
-//   "width": 512,
-//   "height": 512,
-//   "send_images": true,
-//   "save_images": true
-// }
-
 	if (!interaction.isChatInputCommand()) return;
 
     const getArgValue = (name) => {
@@ -70,12 +59,41 @@ client.on(Events.InteractionCreate, async interaction => {
 
     } else if (interaction.commandName == "draw") {
 
+        // tell Discord to wait
         await interaction.deferReply();
-        await wait(4_000);
-		await interaction.editReply({ content: "After API responds this will contain the image" });
+        
+        // do API request
+        fetch(`https://d0fcf20235e26ae84e.gradio.live/sdapi/v1/txt2img`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                "prompt": getArgValue("pos"),
+                "seed": -1,
+                "batch_size": 1,
+                "steps": 30,
+                "width": getArgValue("size") == "tall" ? 1000 : getArgValue("size") == "wide" ? 1600 : 1200,
+                "height": getArgValue("size") == "tall" ? 1600 : getArgValue("size") == "wide" ? 1000 : 1200,
+                "send_images": true,
+                "save_images": true
+            })
+        })
+        .then(response => {
 
-        // console.log("  Pos:" + getArgValue("pos"));
-        // console.log("  Size:" + getArgValue("size"));
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${ response.status }`);
+            }
+            return response.json();
+        })
+        .then(json => {
+
+            console.log(json);
+
+            // finally update our response
+            interaction.editReply({ files: [ new AttachmentBuilder(Buffer.from(json.images[0], "base64"), { name: "image.png" }) ] });
+        })
+        .catch(error => {
+            interaction.editReply(`**Error:**\`\n${ error }\``);
+        });
 
     } else {
 
