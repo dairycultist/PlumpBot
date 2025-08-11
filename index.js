@@ -53,26 +53,7 @@ client.on(Events.InteractionCreate, async interaction => {
 
 	console.log(interaction);
 
-    const command = interaction.client.commands.get(interaction.commandName);
-
-	if (!command) {
-		console.error(`No command matching ${interaction.commandName} was found.`);
-		return;
-	}
-
-	try {
-
-		await command.execute(interaction);
-
-	} catch (error) {
-
-		console.error(error);
-		if (interaction.replied || interaction.deferred) {
-			await interaction.followUp({ content: 'There was an error while executing this command!', flags: MessageFlags.Ephemeral });
-		} else {
-			await interaction.reply({ content: 'There was an error while executing this command!', flags: MessageFlags.Ephemeral });
-		}
-	}
+    await interaction.reply({ content: interaction.commandName, flags: MessageFlags.Ephemeral });
 });
 
 // message handling
@@ -88,14 +69,9 @@ client.on(Events.MessageCreate, message => {
 	try {
 
         const commands = [
-            {
-                data: new SlashCommandBuilder()
-                    .setName("ping")
-                    .setDescription("Replies with Pong!"),
-                execute: async (interaction) => {
-                    await interaction.reply("Pong!");
-                },
-            }
+            new SlashCommandBuilder()
+                .setName("ping")
+                .setDescription("Replies with Pong!").toJSON()
         ];
 
         const rest = new REST().setToken(token);
