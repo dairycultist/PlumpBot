@@ -58,8 +58,9 @@ let genCurrent = undefined;
 async function generateImages(prompt) {
 
     // instead of polling the API immediately for every drawing request (and overwhelming it/having requests dropped), we have a queueing system
-    // the API fetch automatically drops (for the time it takes to gen ~3.5 images) if it's open for too long (even if we extend the fetch's timeout)
+    // since the API fetch automatically drops (after the time it takes to gen ~3.5 images) if it's open for too long (even if we extend the fetch's timeout)
 
+    // queue this prompt
     genQueue.push(prompt);
 
     // wait until nothing it currently being generated AND we're next in queue
@@ -75,38 +76,37 @@ async function generateImages(prompt) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-            "prompt": prompt.pos,
-            "negative_prompt": prompt.neg,
-            "seed": prompt.seed,
+            "prompt":           prompt.pos,
+            "negative_prompt":  prompt.neg,
+            "seed":             prompt.seed,
             // sampler_name: null,
             // scheduler: null,
-            "batch_size": prompt.count,
-            "steps": 30,
+            "batch_size":       prompt.count,
+            "steps":            30,
             // cfg_scale: 7,
-            "width": prompt.width,
-            "height": prompt.height,
+            "width":            prompt.width,
+            "height":           prompt.height,
             // "sampler_index": "Euler",
-            "send_images": true,
-            "save_images": false
+            "send_images":      true,
+            "save_images":      false
         })
     });
 
     // show we're done generating so the next in queue can start
     genCurrent = undefined;
 
+    // process response
     if (!response.ok) {
         throw new Error(response.status);
     };
 
     const json = await response.json();
 
-    // console.log("TODO include this as metadata in the image:");
-    // console.log(json.info);
+    // TODO include json.info as metadata in the images
 
     let images = [];
 
     for (image of json.images) {
-
         images.push(new AttachmentBuilder(Buffer.from(image, "base64"), { name: "image.png" }));
     }
 
