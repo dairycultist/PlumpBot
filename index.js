@@ -54,7 +54,6 @@ client.on(Events.GuildMemberAdd, member => {
 // and clean up the imports
 
 let gradioID = undefined;
-let gradioPingInterval = undefined;
 
 // queues the generation and fetches when it's its turn. await on this!
 // instead of polling the API immediately for every drawing request (and overwhelming it/having requests dropped), we have a queueing system
@@ -107,22 +106,12 @@ client.on(Events.InteractionCreate, async interaction => {
 
     if (interaction.commandName == "setgradioid") {
 
-        // clear the ping interval (for preventing inactivity) if it exists
-        if (gradioPingInterval)
-            clearInterval(gradioPingInterval);
-
         // appropriately set gradio ID
         gradioID = getArgValue("id");
 
         if (gradioID) {
 
             await interaction.reply({ content: `Set gradio link to https://${ gradioID }.gradio.live/ and pinging backend every minute to prevent inactivity.`, flags: MessageFlags.Ephemeral });
-
-            gradioPingInterval = setInterval(function() {
-
-                fetch(`https://${ gradioID }.gradio.live/internal/ping`);
-
-            }, 1000 * 60);
 
         } else {
 
