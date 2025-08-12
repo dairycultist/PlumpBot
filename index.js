@@ -50,17 +50,51 @@ client.on(Events.GuildMemberAdd, member => {
 // add a /allow and /disallow command to tell the bot where you can gen (that also means I need non-volatile storage server-side, ugh)
 // it'll default to disallowed
 
-// ALSO I should probably implement a drawing queue system, since currently the API is being polled immediately for every drawing request and I think it's getting overwhelmed
-// ill make it so it's just await generate_image(parameters) and all the queuing and fetching is done under the hood so it's super sleek
 // also I think I can remove my pinging every minute script since a script that endlessly prints to the console in a looper.pylib file can keep it from going inactive
 // I might just put that at the end of my existing pylib but a new version specific to this bot('s repository)
 // and clean up the imports
 
-// command handling https://discordjs.guide/creating-your-bot/slash-commands.html
-// text to image endpoint <GRADIO_LIVE_URL>/docs#/default/text2imgapi_sdapi_v1_txt2img_post
 let gradioID = undefined;
 let gradioPingInterval = undefined;
 
+// queues the generation and fetches when it's its turn. await on this!
+// instead of polling the API immediately for every drawing request (and overwhelming it/having requests dropped), we have a queueing system
+async function generateImages(pos, neg, seed, count, width, height) {
+
+    // do API request (text to image endpoint <GRADIO_LIVE_URL>/docs#/default/text2imgapi_sdapi_v1_txt2img_post)
+    const response = await fetch(`https://${ gradioID }.gradio.live/sdapi/v1/txt2img`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            "prompt": pos,
+            "negative_prompt": neg,
+            "seed": seed,
+            // sampler_name: null,
+            // scheduler: null,
+            "batch_size": count,
+            "steps": 30,
+            // cfg_scale: 7,
+            "width": width,
+            "height": height,
+            // "sampler_index": "Euler",
+            "send_images": true,
+            "save_images": false
+        })
+    });
+
+    if (!response.ok) {
+        throw new Error(response.status);
+    };
+
+    const json = response.json();
+
+    // console.log("TODO include this as metadata in the image:");
+    // console.log(json.info);
+
+    return [ new AttachmentBuilder(Buffer.from(json.images[0], "base64"), { name: "image.png" }) ];
+}
+
+// command handling https://discordjs.guide/creating-your-bot/slash-commands.html
 client.on(Events.InteractionCreate, async interaction => {
 
 	if (!interaction.isChatInputCommand()) return;
@@ -108,44 +142,24 @@ client.on(Events.InteractionCreate, async interaction => {
         // tell Discord to wait
         await interaction.deferReply();
         
-        // do API request
-        fetch(`https://${ gradioID }.gradio.live/sdapi/v1/txt2img`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                "prompt": getArgValue("pos"),
-                "negative_prompt": getArgValue("neg"),
-                "seed": -1,
-                // sampler_name: null,
-                // scheduler: null,
-                "batch_size": 1,
-                "steps": 30,
-                // cfg_scale: 7,
-                "width": getArgValue("size") ? parseInt(getArgValue("size").split("x")[0]) : 1200,
-                "height": getArgValue("size") ? parseInt(getArgValue("size").split("x")[1]) : 1200,
-                // "sampler_index": "Euler",
-                "send_images": true,
-                "save_images": false
-            })
-        })
-        .then(response => {
+        try {
 
-            if (!response.ok) {
-                throw new Error(response.status);
-            }
-            return response.json();
-        })
-        .then(json => {
-
-            console.log("TODO include this as metadata in the image:");
-            console.log(json.info);
+            const images = await generateImages(
+                getArgValue("pos"),
+                getArgValue("neg"),
+                -1,
+                1,
+                getArgValue("size") ? parseInt(getArgValue("size").split("x")[0]) : 1200,
+                getArgValue("size") ? parseInt(getArgValue("size").split("x")[1]) : 1200
+            );
 
             // update our response with the image
-            interaction.editReply({ files: [ new AttachmentBuilder(Buffer.from(json.images[0], "base64"), { name: "image.png" }) ] });
-        })
-        .catch(error => {
+            interaction.editReply({ files: images });
+
+        } catch (error) {
+
             interaction.editReply(`Something went wrong (${ error }), please try again. If this *keeps happening*, ping the owner.`);
-        });
+        }
 
     } else {
 
