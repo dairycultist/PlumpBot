@@ -51,35 +51,48 @@ client.on(Events.GuildMemberAdd, member => {
 // it'll default to disallowed
 
 let gradioID = undefined;
+let genQueue = [];
+let genCurrent = undefined;
 
 // queues the generation and fetches when it's its turn. await on this!
-async function generateImages(pos, neg, seed, count, width, height) {
+async function generateImages(prompt) {
 
     // instead of polling the API immediately for every drawing request (and overwhelming it/having requests dropped), we have a queueing system
     // the API fetch automatically drops (for the time it takes to gen ~3.5 images) if it's open for too long (even if we extend the fetch's timeout)
 
-    // TODO implement queue
+    genQueue.push(prompt);
+
+    // wait until nothing it currently being generated AND we're next in queue
+    while (genCurrent || genQueue[0] != prompt) {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+
+    // set ourselves as what's currently being generated
+    genCurrent = genQueue.shift();
 
     // do API request (text to image endpoint <GRADIO_LIVE_URL>/docs#/default/text2imgapi_sdapi_v1_txt2img_post)
     const response = await fetch(`https://${ gradioID }.gradio.live/sdapi/v1/txt2img`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-            "prompt": pos,
-            "negative_prompt": neg,
-            "seed": seed,
+            "prompt": prompt.pos,
+            "negative_prompt": prompt.neg,
+            "seed": prompt.seed,
             // sampler_name: null,
             // scheduler: null,
-            "batch_size": count,
+            "batch_size": prompt.count,
             "steps": 30,
             // cfg_scale: 7,
-            "width": width,
-            "height": height,
+            "width": prompt.width,
+            "height": prompt.height,
             // "sampler_index": "Euler",
             "send_images": true,
             "save_images": false
         })
     });
+
+    // show we're done generating so the next in queue can start
+    genCurrent = undefined;
 
     if (!response.ok) {
         throw new Error(response.status);
@@ -118,9 +131,9 @@ client.on(Events.InteractionCreate, async interaction => {
         gradioID = getArgValue("id");
 
         if (gradioID) {
-            await interaction.reply({ content: `Set gradio link to https://${ gradioID }.gradio.live/ and pinging backend every minute to prevent inactivity.`, flags: MessageFlags.Ephemeral });
+            await interaction.reply({ content: `Set gradio link to https://${ gradioID }.gradio.live/.`, flags: MessageFlags.Ephemeral });
         } else {
-            await interaction.reply({ content: `Cleared gradio link and stopped backend ping.`, flags: MessageFlags.Ephemeral });
+            await interaction.reply({ content: `Cleared gradio link.`, flags: MessageFlags.Ephemeral });
         }
 
     } else if (interaction.commandName == "draw") {
@@ -137,14 +150,14 @@ client.on(Events.InteractionCreate, async interaction => {
         
         try {
 
-            const images = await generateImages(
-                getArgValue("pos"),
-                getArgValue("neg"),
-                -1,
-                !getArgValue("type") || getArgValue("type") == "single" ? 1 : 3,
-                getArgValue("size") ? parseInt(getArgValue("size").split("x")[0]) : 1200,
-                getArgValue("size") ? parseInt(getArgValue("size").split("x")[1]) : 1200
-            );
+            const images = await generateImages({
+                pos: getArgValue("pos"),
+                neg: getArgValue("neg"),
+                seed: -1,
+                count: !getArgValue("type") || getArgValue("type") == "single" ? 1 : 3,
+                width: getArgValue("size") ? parseInt(getArgValue("size").split("x")[0]) : 1200,
+                height: getArgValue("size") ? parseInt(getArgValue("size").split("x")[1]) : 1200
+            });
 
             // update our response with the image
             interaction.editReply({ files: images });
