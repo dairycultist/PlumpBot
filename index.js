@@ -50,6 +50,12 @@ client.on(Events.GuildMemberAdd, member => {
 // add a /allow and /disallow command to tell the bot where you can gen (that also means I need non-volatile storage server-side, ugh)
 // it'll default to disallowed
 
+// ALSO I should probably implement a drawing queue system, since currently the API is being polled immediately for every drawing request and I think it's getting overwhelmed
+// ill make it so it's just await generate_image(parameters) and all the queuing and fetching is done under the hood so it's super sleek
+// also I think I can remove my pinging every minute script since a script that endlessly prints to the console in a looper.pylib file can keep it from going inactive
+// I might just put that at the end of my existing pylib but a new version specific to this bot('s repository)
+// and clean up the imports
+
 // command handling https://discordjs.guide/creating-your-bot/slash-commands.html
 // text to image endpoint <GRADIO_LIVE_URL>/docs#/default/text2imgapi_sdapi_v1_txt2img_post
 let gradioID = undefined;
@@ -182,6 +188,12 @@ if (redeploy.trim().toLowerCase() == "y") {
                         { name: "square", value: "1200x1200" },
                         { name: "tall", value: "1000x1600" },
                         { name: "wide", value: "1600x1000" }
+                    ))
+                    .addStringOption(option => option.setName("type").setDescription("Batching and special prompt features (defaults to single).").addChoices(
+                        { name: "single", value: "single" },
+                        { name: "batch of 4", value: "batch4" },
+                        { name: "batch of 9 (owner only)", value: "batch9" },
+                        // { name: "progression (put SIZE where you want {medium, large, huge, gigantic})", value: "1600x1000" }
                     ))
                     .toJSON()
             ];
