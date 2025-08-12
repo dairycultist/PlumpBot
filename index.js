@@ -50,7 +50,6 @@ client.on(Events.GuildMemberAdd, member => {
 // add a /allow and /disallow command to tell the bot where you can gen (that also means I need non-volatile storage server-side, ugh)
 // it'll default to disallowed
 
-// also I think I can remove my pinging every minute script since a script that endlessly prints to the console in a looper.pylib file can keep it from going inactive
 // I might just put that at the end of my existing pylib but a new version specific to this bot('s repository)
 // and clean up the imports
 
@@ -86,7 +85,7 @@ async function generateImages(pos, neg, seed, count, width, height) {
         throw new Error(response.status);
     };
 
-    const json = response.json();
+    const json = await response.json();
 
     // console.log("TODO include this as metadata in the image:");
     // console.log(json.info);
