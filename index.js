@@ -53,8 +53,12 @@ client.on(Events.GuildMemberAdd, member => {
 let gradioID = undefined;
 
 // queues the generation and fetches when it's its turn. await on this!
-// instead of polling the API immediately for every drawing request (and overwhelming it/having requests dropped), we have a queueing system
 async function generateImages(pos, neg, seed, count, width, height) {
+
+    // instead of polling the API immediately for every drawing request (and overwhelming it/having requests dropped), we have a queueing system
+    // the API fetch automatically drops (for the time it takes to gen ~3.5 images) if it's open for too long (even if we extend the fetch's timeout)
+
+    // TODO implement queue
 
     // do API request (text to image endpoint <GRADIO_LIVE_URL>/docs#/default/text2imgapi_sdapi_v1_txt2img_post)
     const response = await fetch(`https://${ gradioID }.gradio.live/sdapi/v1/txt2img`, {
@@ -128,13 +132,6 @@ client.on(Events.InteractionCreate, async interaction => {
             return;
         }
 
-        // if trying to batch9 but you're not me, don't
-        if (interaction.user.id != 340286071306715137) {
-
-            await interaction.reply({ content: "Only <@340286071306715137> can draw batches this big!", flags: MessageFlags.Ephemeral });
-            return;
-        }
-
         // tell Discord to wait
         await interaction.deferReply();
         
@@ -144,7 +141,7 @@ client.on(Events.InteractionCreate, async interaction => {
                 getArgValue("pos"),
                 getArgValue("neg"),
                 -1,
-                !getArgValue("type") || getArgValue("type") == "single" ? 1 : getArgValue("type") == "batch4" ? 4 : 9,
+                !getArgValue("type") || getArgValue("type") == "single" ? 1 : 3,
                 getArgValue("size") ? parseInt(getArgValue("size").split("x")[0]) : 1200,
                 getArgValue("size") ? parseInt(getArgValue("size").split("x")[1]) : 1200
             );
@@ -201,9 +198,8 @@ if (redeploy.trim().toLowerCase() == "y") {
                     ))
                     .addStringOption(option => option.setName("type").setDescription("Batching and special prompt features (defaults to single).").addChoices(
                         { name: "single", value: "single" },
-                        { name: "batch of 4", value: "batch4" },
-                        { name: "batch of 9 (owner only)", value: "batch9" },
-                        // { name: "progression (put SIZE where you want {medium, large, huge, gigantic})", value: "1600x1000" }
+                        { name: "batch of 3", value: "batch3" },
+                        // { name: "progression (put SIZE where you want {medium, huge, gigantic})", value: "1600x1000" }
                     ))
                     .toJSON()
             ];
