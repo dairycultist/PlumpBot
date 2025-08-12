@@ -50,9 +50,6 @@ client.on(Events.GuildMemberAdd, member => {
 // add a /allow and /disallow command to tell the bot where you can gen (that also means I need non-volatile storage server-side, ugh)
 // it'll default to disallowed
 
-// I might just put that at the end of my existing pylib but a new version specific to this bot('s repository)
-// and clean up the imports
-
 let gradioID = undefined;
 
 // queues the generation and fetches when it's its turn. await on this!
@@ -89,7 +86,14 @@ async function generateImages(pos, neg, seed, count, width, height) {
     // console.log("TODO include this as metadata in the image:");
     // console.log(json.info);
 
-    return [ new AttachmentBuilder(Buffer.from(json.images[0], "base64"), { name: "image.png" }) ];
+    let images = [];
+
+    for (image of json.images) {
+
+        images.push(new AttachmentBuilder(Buffer.from(image, "base64"), { name: "image.png" }));
+    }
+
+    return images;
 }
 
 // command handling https://discordjs.guide/creating-your-bot/slash-commands.html
@@ -110,11 +114,8 @@ client.on(Events.InteractionCreate, async interaction => {
         gradioID = getArgValue("id");
 
         if (gradioID) {
-
             await interaction.reply({ content: `Set gradio link to https://${ gradioID }.gradio.live/ and pinging backend every minute to prevent inactivity.`, flags: MessageFlags.Ephemeral });
-
         } else {
-
             await interaction.reply({ content: `Cleared gradio link and stopped backend ping.`, flags: MessageFlags.Ephemeral });
         }
 
@@ -127,6 +128,13 @@ client.on(Events.InteractionCreate, async interaction => {
             return;
         }
 
+        // if trying to batch9 but you're not me, don't
+        if (interaction.user.id != 340286071306715137) {
+
+            await interaction.reply({ content: "Only <@340286071306715137> can draw batches this big!", flags: MessageFlags.Ephemeral });
+            return;
+        }
+
         // tell Discord to wait
         await interaction.deferReply();
         
@@ -136,7 +144,7 @@ client.on(Events.InteractionCreate, async interaction => {
                 getArgValue("pos"),
                 getArgValue("neg"),
                 -1,
-                1,
+                !getArgValue("type") || getArgValue("type") == "single" ? 1 : getArgValue("type") == "batch4" ? 4 : 9,
                 getArgValue("size") ? parseInt(getArgValue("size").split("x")[0]) : 1200,
                 getArgValue("size") ? parseInt(getArgValue("size").split("x")[1]) : 1200
             );

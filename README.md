@@ -33,3 +33,5 @@ The notebook automatically shuts down after 1 hour due to inactivity, even if yo
 while (1):
     print("looping!");
 ```
+
+<!-- I might just put that at the end of my existing pylib but a new version specific to this bot('s repository) and clean up the imports -->
