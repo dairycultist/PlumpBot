@@ -46,10 +46,6 @@ client.on(Events.GuildMemberAdd, member => {
 // mini goal is to have the bot take in a paperspace key as part of the config, and having a "start drawing backend" and "stop drawing backend" command, creating the notebook, starting it, and storing the gradio link
 // then we can remove the slightly cumbersome setgradioid command, and I also don't have to open paperspace to start the drawing
 
-// AI image commands can be run in any channel right now
-// add a /allow and /disallow command to tell the bot where you can gen (that also means I need non-volatile storage server-side, ugh)
-// it'll default to disallowed
-
 let gradioID = undefined;
 let genQueue = [];
 let genCurrent = undefined;
@@ -191,12 +187,16 @@ if (redeploy.trim().toLowerCase() == "y") {
     (async () => {
         try {
 
+            // AI image commands can be run in any channel right now
+            // add a /allowdraw and /disallowdraw command to tell the bot where you can gen (that also means I need non-volatile storage server-side, ugh)
+            // it'll default to disallowed
+
             const commands = [
                 new SlashCommandBuilder()
                     .setName("setgradioid")
                     .setDescription("Set (or clear) the ID of the gradio sharelink to make requests to.")
                     .addStringOption(option => option.setName("id").setDescription("https://<THIS_PART>.gradio.live/ OR leave empty to clear gradio ID."))
-                    .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers)
+                    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
                     .toJSON()
                 ,
                 new SlashCommandBuilder()
