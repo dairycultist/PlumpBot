@@ -131,41 +131,41 @@ const commands = [
 
                     const seed = Math.floor(Math.random() * 999999);
 
-                    images.push(await generateImages({
+                    images.push((await generateImages({
                         pos: getArgValue("pos").replaceAll("SIZE", "medium"),
                         neg: getArgValue("neg"),
                         seed: seed,
                         count: 1,
                         width: getArgValue("size") ? parseInt(getArgValue("size").split("x")[0]) : 1200,
                         height: getArgValue("size") ? parseInt(getArgValue("size").split("x")[1]) : 1200
-                    })[0]);
+                    }))[0]);
 
-                    images.push(await generateImages({
+                    images.push((await generateImages({
                         pos: getArgValue("pos").replaceAll("SIZE", "large"),
                         neg: getArgValue("neg"),
                         seed: seed,
                         count: 1,
                         width: getArgValue("size") ? parseInt(getArgValue("size").split("x")[0]) : 1200,
                         height: getArgValue("size") ? parseInt(getArgValue("size").split("x")[1]) : 1200
-                    })[0]);
+                    }))[0]);
 
-                    images.push(await generateImages({
+                    images.push((await generateImages({
                         pos: getArgValue("pos").replaceAll("SIZE", "huge"),
                         neg: getArgValue("neg"),
                         seed: seed,
                         count: 1,
                         width: getArgValue("size") ? parseInt(getArgValue("size").split("x")[0]) : 1200,
                         height: getArgValue("size") ? parseInt(getArgValue("size").split("x")[1]) : 1200
-                    })[0]);
+                    }))[0]);
 
-                    images.push(await generateImages({
+                    images.push((await generateImages({
                         pos: getArgValue("pos").replaceAll("SIZE", "gigantic"),
                         neg: getArgValue("neg"),
                         seed: seed,
                         count: 1,
                         width: getArgValue("size") ? parseInt(getArgValue("size").split("x")[0]) : 1200,
                         height: getArgValue("size") ? parseInt(getArgValue("size").split("x")[1]) : 1200
-                    })[0]);
+                    }))[0]);
 
                 } else {
 
