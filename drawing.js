@@ -138,7 +138,7 @@ const commands = [
                         count: 1,
                         width: getArgValue("size") ? parseInt(getArgValue("size").split("x")[0]) : 1200,
                         height: getArgValue("size") ? parseInt(getArgValue("size").split("x")[1]) : 1200
-                    }));
+                    })[0]);
 
                     images.push(await generateImages({
                         pos: getArgValue("pos").replaceAll("SIZE", "large"),
@@ -147,7 +147,7 @@ const commands = [
                         count: 1,
                         width: getArgValue("size") ? parseInt(getArgValue("size").split("x")[0]) : 1200,
                         height: getArgValue("size") ? parseInt(getArgValue("size").split("x")[1]) : 1200
-                    }));
+                    })[0]);
 
                     images.push(await generateImages({
                         pos: getArgValue("pos").replaceAll("SIZE", "huge"),
@@ -156,7 +156,7 @@ const commands = [
                         count: 1,
                         width: getArgValue("size") ? parseInt(getArgValue("size").split("x")[0]) : 1200,
                         height: getArgValue("size") ? parseInt(getArgValue("size").split("x")[1]) : 1200
-                    }));
+                    })[0]);
 
                     images.push(await generateImages({
                         pos: getArgValue("pos").replaceAll("SIZE", "gigantic"),
@@ -165,7 +165,7 @@ const commands = [
                         count: 1,
                         width: getArgValue("size") ? parseInt(getArgValue("size").split("x")[0]) : 1200,
                         height: getArgValue("size") ? parseInt(getArgValue("size").split("x")[1]) : 1200
-                    }));
+                    })[0]);
 
                 } else {
 
