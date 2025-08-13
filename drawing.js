@@ -1,3 +1,5 @@
+const { MessageFlags, SlashCommandBuilder, PermissionFlagsBits, REST, Routes, AttachmentBuilder } = require("discord.js");
+
 // mini goal is to have the bot take in a paperspace key as part of the config, and having a "start drawing backend" and "stop drawing backend" command, creating the notebook, starting it, and storing the gradio link
 // then we can remove the slightly cumbersome setgradioid command, and I also don't have to open paperspace to start the drawing
 

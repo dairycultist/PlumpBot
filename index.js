@@ -12,7 +12,7 @@ function getConfig() {
     }
 }
 
-const { Client, Collection, Events, GatewayIntentBits, MessageFlags, EmbedBuilder, SlashCommandBuilder, PermissionFlagsBits, REST, Routes, AttachmentBuilder } = require("discord.js");
+const { Client, Events, GatewayIntentBits, MessageFlags } = require("discord.js");
 const { attemptEmbedArtFromMessage } = require("./embed_art.js");
 const { commands, attemptRedeployCommands } = require("./drawing.js");
 const { token, clientID } = getConfig();
