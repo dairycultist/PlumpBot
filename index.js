@@ -121,7 +121,30 @@ client.on(Events.InteractionCreate, async interaction => {
         return argument ? argument.value : undefined;
     };
 
-    if (interaction.commandName == "setgradioid") {
+    if (interaction.commandName == "loras") {
+
+        fetch(`https://${ gradioID }.gradio.live/sdapi/v1/loras`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(response.status + " " + response.statusText);
+            }
+            return response.json();
+        })
+        .then(json => {
+
+            let construct = "";
+
+            for (const lora of json) {
+                construct += `\`<lora:${ lora.alias }:1>\``;
+            }
+
+            interaction.reply({ content: construct, flags: MessageFlags.Ephemeral });
+        })
+        .catch(error => {
+            interaction.reply({ content: `There was a problem with the fetch operation: ${ error }`, flags: MessageFlags.Ephemeral });
+        });
+
+    } else if (interaction.commandName == "setgradioid") {
 
         // appropriately set gradio ID
         gradioID = getArgValue("id");
@@ -212,8 +235,13 @@ if (redeploy.trim().toLowerCase() == "y") {
                     .addStringOption(option => option.setName("type").setDescription("Batching and special prompt features (defaults to single).").addChoices(
                         { name: "single", value: "single" },
                         { name: "batch of 3", value: "batch3" },
-                        // { name: "progression (put SIZE where you want {medium, huge, gigantic})", value: "1600x1000" }
+                        { name: "progression (put SIZE where you want {medium, huge, gigantic})", value: "1600x1000" }
                     ))
+                    .toJSON()
+                ,
+                new SlashCommandBuilder()
+                    .setName("loras")
+                    .setDescription("Get all loras (which you can copy into your prompt).")
                     .toJSON()
             ];
 
