@@ -45,25 +45,22 @@ client.on(Events.InteractionCreate, async interaction => {
 
 	if (!interaction.isChatInputCommand()) return;
 
-    const getArgValue = (name) => {
-        
-        const argument = interaction.options._hoistedOptions.find((arg) => arg.name == name);
+    for (const command of commands) {
 
-        return argument ? argument.value : undefined;
-    };
+        console.log(command);
 
-    if (interaction.commandName == "loras") {
+        if (command.data.name == interaction.commandName) {
 
-        
-
-    } else if (interaction.commandName == "setgradioid") {
-
-    } else if (interaction.commandName == "draw") {
-
-    } else {
-
-        await interaction.reply({ content: "Command doesn't exist!", flags: MessageFlags.Ephemeral });
+            await command.execute((name) => {
+                const argument = interaction.options._hoistedOptions.find((arg) => arg.name == name);
+                return argument ? argument.value : undefined;
+            });
+            return;
+        }
     }
+
+    // if no command matched
+    await interaction.reply({ content: "Command doesn't exist!", flags: MessageFlags.Ephemeral });
 });
 
 // message handling
