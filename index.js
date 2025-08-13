@@ -1,6 +1,7 @@
-
-function getConfig() {
-
+const { Client, Events, GatewayIntentBits, MessageFlags } = require("discord.js");
+const { attemptEmbedArtFromMessage } = require("./embed_art.js");
+const { commands, attemptRedeployCommands } = require("./drawing.js");
+const { token, clientID } = (() => {
     try {
         return require("../config.json");
     } catch (error) {
@@ -10,12 +11,7 @@ function getConfig() {
         console.error("Client ID: Go to https://discord.com/developers/applications, select your app, select 'General Information' on the sidebar, and copy the 'Application ID.'");
         process.exit(1);
     }
-}
-
-const { Client, Events, GatewayIntentBits, MessageFlags } = require("discord.js");
-const { attemptEmbedArtFromMessage } = require("./embed_art.js");
-const { commands, attemptRedeployCommands } = require("./drawing.js");
-const { token, clientID } = getConfig();
+})();
 const client = new Client({
     // https://discordjs.guide/popular-topics/intents.html#privileged-intents
     intents: [
