@@ -135,7 +135,7 @@ client.on(Events.InteractionCreate, async interaction => {
             let construct = "";
 
             for (const lora of json) {
-                construct += `\`<lora:${ lora.alias }:1>\``;
+                construct += `\`<lora:${ lora.alias }:1>\`\n`;
             }
 
             interaction.reply({ content: construct, flags: MessageFlags.Ephemeral });
@@ -164,19 +164,72 @@ client.on(Events.InteractionCreate, async interaction => {
             return;
         }
 
+        if (getArgValue("type") == "progression" && !getArgValue("pos").includes("SIZE")) {
+
+            await interaction.reply({ content: "Since you're using `type=progression`, you must use the keyword `SIZE` in your prompt.\n\nExample: `1girl, SIZE breasts, red dress`", flags: MessageFlags.Ephemeral });
+            return;
+        }
+
         // tell Discord to wait
         await interaction.deferReply();
         
         try {
 
-            const images = await generateImages({
-                pos: getArgValue("pos"),
-                neg: getArgValue("neg"),
-                seed: -1,
-                count: !getArgValue("type") || getArgValue("type") == "single" ? 1 : 3,
-                width: getArgValue("size") ? parseInt(getArgValue("size").split("x")[0]) : 1200,
-                height: getArgValue("size") ? parseInt(getArgValue("size").split("x")[1]) : 1200
-            });
+            let images = [];
+
+            if (getArgValue("type") == "progression") {
+
+                // TODO if one of the images fails, still send the ones we already made
+
+                const seed = Math.floor(Math.random() * 999999);
+
+                images.push(await generateImages({
+                    pos: getArgValue("pos").replaceAll("SIZE", "medium"),
+                    neg: getArgValue("neg"),
+                    seed: seed,
+                    count: 1,
+                    width: getArgValue("size") ? parseInt(getArgValue("size").split("x")[0]) : 1200,
+                    height: getArgValue("size") ? parseInt(getArgValue("size").split("x")[1]) : 1200
+                }));
+
+                images.push(await generateImages({
+                    pos: getArgValue("pos").replaceAll("SIZE", "large"),
+                    neg: getArgValue("neg"),
+                    seed: seed,
+                    count: 1,
+                    width: getArgValue("size") ? parseInt(getArgValue("size").split("x")[0]) : 1200,
+                    height: getArgValue("size") ? parseInt(getArgValue("size").split("x")[1]) : 1200
+                }));
+
+                images.push(await generateImages({
+                    pos: getArgValue("pos").replaceAll("SIZE", "huge"),
+                    neg: getArgValue("neg"),
+                    seed: seed,
+                    count: 1,
+                    width: getArgValue("size") ? parseInt(getArgValue("size").split("x")[0]) : 1200,
+                    height: getArgValue("size") ? parseInt(getArgValue("size").split("x")[1]) : 1200
+                }));
+
+                images.push(await generateImages({
+                    pos: getArgValue("pos").replaceAll("SIZE", "gigantic"),
+                    neg: getArgValue("neg"),
+                    seed: seed,
+                    count: 1,
+                    width: getArgValue("size") ? parseInt(getArgValue("size").split("x")[0]) : 1200,
+                    height: getArgValue("size") ? parseInt(getArgValue("size").split("x")[1]) : 1200
+                }));
+
+            } else {
+
+                images = await generateImages({
+                    pos: getArgValue("pos"),
+                    neg: getArgValue("neg"),
+                    seed: -1,
+                    count: !getArgValue("type") || getArgValue("type") == "single" ? 1 : 3,
+                    width: getArgValue("size") ? parseInt(getArgValue("size").split("x")[0]) : 1200,
+                    height: getArgValue("size") ? parseInt(getArgValue("size").split("x")[1]) : 1200
+                });
+            }
 
             // update our response with the image
             interaction.editReply({ files: images });
@@ -235,7 +288,7 @@ if (redeploy.trim().toLowerCase() == "y") {
                     .addStringOption(option => option.setName("type").setDescription("Batching and special prompt features (defaults to single).").addChoices(
                         { name: "single", value: "single" },
                         { name: "batch of 3", value: "batch3" },
-                        { name: "progression (put SIZE where you want {medium, huge, gigantic})", value: "1600x1000" }
+                        { name: "progression", value: "progression" }
                     ))
                     .toJSON()
                 ,
