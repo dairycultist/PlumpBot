@@ -228,7 +228,7 @@ const commands = [
 ];
 
 // asynchronously deploy commands via rest module
-function attemptRedeployCommands() {
+function attemptRedeployCommands(token, clientID) {
 
     const redeploy = require("readline-sync").question("Should we redeploy commands? (May be throttled if you do it too often) [y/N]");
 

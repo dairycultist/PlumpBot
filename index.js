@@ -79,5 +79,5 @@ client.on(Events.MessageCreate, message => {
 });
 
 // ask for setup and start bot
-attemptRedeployCommands();
+attemptRedeployCommands(token, clientID);
 client.login(token);
