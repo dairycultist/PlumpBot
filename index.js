@@ -47,11 +47,9 @@ client.on(Events.InteractionCreate, async interaction => {
 
     for (const command of commands) {
 
-        console.log(command);
-
         if (command.data.name == interaction.commandName) {
 
-            await command.execute((name) => {
+            await command.execute(interaction, (name) => {
                 const argument = interaction.options._hoistedOptions.find((arg) => arg.name == name);
                 return argument ? argument.value : undefined;
             });

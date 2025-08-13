@@ -74,7 +74,7 @@ const commands = [
             .addStringOption(option => option.setName("id").setDescription("https://<THIS_PART>.gradio.live/ OR leave empty to clear gradio ID."))
             .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
             .toJSON(),
-        execute: async (getArgValue) => {
+        execute: async (interaction, getArgValue) => {
 
             // appropriately set gradio ID
             gradioID = getArgValue("id");
@@ -103,7 +103,7 @@ const commands = [
                 { name: "progression", value: "progression" }
             ))
             .toJSON(),
-        execute: async (getArgValue) => {
+        execute: async (interaction, getArgValue) => {
 
             // if a gradio ID isn't even set, there's no chance the API request will work
             if (!gradioID) {
@@ -193,7 +193,7 @@ const commands = [
             .setName("loras")
             .setDescription("Get all loras (which you can copy into your prompt).")
             .toJSON(),
-        execute: async (getArgValue) => {
+        execute: async (interaction, getArgValue) => {
 
             // if a gradio ID isn't even set, there's no chance the API request will work
             if (!gradioID) {
