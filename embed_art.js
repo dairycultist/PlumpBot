@@ -222,7 +222,7 @@ function fetchCallback(url, textToJson, callback) {
     .catch(error => console.error("There was a problem fetching: ", error));
 }
 
-function embedArt(client, message, response, post) {
+async function embedArt(client, message, response, post) {
 
     // {
     //     site: {
@@ -288,7 +288,7 @@ function embedArt(client, message, response, post) {
     // attempt to send to Discord. may fail, such as from oversized attachments
     try {
 
-        response.edit({
+        await response.edit({
             content: "",
             embeds: [ embed ],
             files: files
@@ -296,7 +296,7 @@ function embedArt(client, message, response, post) {
 
     } catch (error) {
 
-        response.edit(error.rawError.message + "(" + error.status + ")\n" + post.url); // TODO include a fix url for these exact scenarios, or have this function return a status to be handled uniquely
+        response.edit(error.rawError.message + "(" + error.status + ")\n" + post.url); // TODO include a fix url for these exact scenarios. we wont add a "returns false if failed" cuz I should fix the problem BEFORE it happens
     }
 }
 
