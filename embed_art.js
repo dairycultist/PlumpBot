@@ -62,6 +62,7 @@ const platforms = [
                     var images = [];
 
                     // reposts are internally different which is annoying but whatever
+                    // TODO unify all video handling (despite many internal differences in API response)
 
                     if (json.posts[0].record.embed["$type"] == "app.bsky.embed.recordWithMedia" && json.posts[0].record.embed.video) {
 
@@ -88,7 +89,7 @@ const platforms = [
 
                     } else {
 
-                        if (json.posts[0].record.embed.images)
+                        if (json.posts[0].record.embed.images || (json.posts[0].record.embed.media && json.posts[0].record.embed.media.images))
                             for (const imageObject of json.posts[0].record.embed.images)
                                 images.push({ attachment: `https://cdn.bsky.app/img/feed_fullsize/plain/${ authorDID }/${ imageObject.image.ref["$link"] }@png`, name: "image.png" });
                     }
