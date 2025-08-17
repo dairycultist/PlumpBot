@@ -8,7 +8,7 @@ let genQueue = [];
 let genCurrent = undefined;
 
 // queues the generation and fetches when it's its turn. await on this!
-async function generateImages(prompt) {
+async function generateImage(prompt) {
 
     // instead of polling the API immediately for every drawing request (and overwhelming it/having requests dropped), we have a queueing system
     // since the API fetch automatically drops (after the time it takes to gen ~3.5 images) if it's open for too long (even if we extend the fetch's timeout)
@@ -25,6 +25,7 @@ async function generateImages(prompt) {
     genCurrent = genQueue.shift();
 
     // do API request (text to image endpoint <GRADIO_LIVE_URL>/docs#/default/text2imgapi_sdapi_v1_txt2img_post)
+    // we don't batch multiple since it has a chance of returning 504
     const response = await fetch(`https://${ gradioID }.gradio.live/sdapi/v1/txt2img`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -34,7 +35,6 @@ async function generateImages(prompt) {
             "seed":             prompt.seed,
             // sampler_name: null,
             // scheduler: null,
-            "batch_size":       prompt.count,
             "steps":            30,
             // cfg_scale: 7,
             "width":            prompt.width,
@@ -55,15 +55,9 @@ async function generateImages(prompt) {
 
     const json = await response.json();
 
-    // TODO include json.info as metadata in the images
+    // TODO include json.info as metadata in the image
 
-    let images = [];
-
-    for (image of json.images) {
-        images.push(new AttachmentBuilder(Buffer.from(image, "base64"), { name: "image.png" }));
-    }
-
-    return images;
+    return new AttachmentBuilder(Buffer.from(json.images[0], "base64"), { name: "image.png" });
 }
 
 const commands = [
@@ -97,9 +91,10 @@ const commands = [
                 { name: "tall", value: "1000x1600" },
                 { name: "wide", value: "1600x1000" }
             ))
-            .addStringOption(option => option.setName("type").setDescription("Batching and special prompt features (defaults to single).").addChoices(
+            .addStringOption(option => option.setName("type").setDescription("Special prompt features (defaults to single).").addChoices(
                 { name: "single", value: "single" },
-                { name: "batch of 3", value: "batch3" },
+                { name: "single but huge", value: "singlehuge" },
+                { name: "batch of 4", value: "batch4" },
                 { name: "progression", value: "progression" }
             ))
             .toJSON(),
@@ -131,52 +126,70 @@ const commands = [
 
                     const seed = Math.floor(Math.random() * 999999);
 
-                    images.push((await generateImages({
+                    images.push((await generateImage({
                         pos: getArgValue("pos").replaceAll("SIZE", "medium"),
                         neg: getArgValue("neg"),
                         seed: seed,
-                        count: 1,
                         width: getArgValue("size") ? parseInt(getArgValue("size").split("x")[0]) : 1200,
                         height: getArgValue("size") ? parseInt(getArgValue("size").split("x")[1]) : 1200
-                    }))[0]);
+                    })));
 
-                    images.push((await generateImages({
+                    images.push((await generateImage({
                         pos: getArgValue("pos").replaceAll("SIZE", "large"),
                         neg: getArgValue("neg"),
                         seed: seed,
-                        count: 1,
                         width: getArgValue("size") ? parseInt(getArgValue("size").split("x")[0]) : 1200,
                         height: getArgValue("size") ? parseInt(getArgValue("size").split("x")[1]) : 1200
-                    }))[0]);
+                    })));
 
-                    images.push((await generateImages({
+                    images.push((await generateImage({
                         pos: getArgValue("pos").replaceAll("SIZE", "huge"),
                         neg: getArgValue("neg"),
                         seed: seed,
-                        count: 1,
                         width: getArgValue("size") ? parseInt(getArgValue("size").split("x")[0]) : 1200,
                         height: getArgValue("size") ? parseInt(getArgValue("size").split("x")[1]) : 1200
-                    }))[0]);
+                    })));
 
-                    images.push((await generateImages({
+                    images.push((await generateImage({
                         pos: getArgValue("pos").replaceAll("SIZE", "gigantic"),
                         neg: getArgValue("neg"),
                         seed: seed,
-                        count: 1,
                         width: getArgValue("size") ? parseInt(getArgValue("size").split("x")[0]) : 1200,
                         height: getArgValue("size") ? parseInt(getArgValue("size").split("x")[1]) : 1200
-                    }))[0]);
+                    })));
 
-                } else {
+                } else if (getArgValue("type") == "batch4") {
 
-                    images = await generateImages({
+                    for (let i = 0; i < 4; i++) {
+
+                        images.push(await generateImage({
+                            pos: getArgValue("pos"),
+                            neg: getArgValue("neg"),
+                            seed: -1,
+                            width: getArgValue("size") ? parseInt(getArgValue("size").split("x")[0]) : 1200,
+                            height: getArgValue("size") ? parseInt(getArgValue("size").split("x")[1]) : 1200
+                        }));
+                    }
+
+                } else if (getArgValue("type") == "singlehuge") {
+
+                    images.push(await generateImage({
                         pos: getArgValue("pos"),
                         neg: getArgValue("neg"),
                         seed: -1,
-                        count: !getArgValue("type") || getArgValue("type") == "single" ? 1 : 3,
+                        width: getArgValue("size") ? parseInt(getArgValue("size").split("x")[0]) * 3 / 2 : 1800,
+                        height: getArgValue("size") ? parseInt(getArgValue("size").split("x")[1]) * 3 / 2 : 1800
+                    }));
+
+                } else {
+
+                    images.push(await generateImage({
+                        pos: getArgValue("pos"),
+                        neg: getArgValue("neg"),
+                        seed: -1,
                         width: getArgValue("size") ? parseInt(getArgValue("size").split("x")[0]) : 1200,
                         height: getArgValue("size") ? parseInt(getArgValue("size").split("x")[1]) : 1200
-                    });
+                    }));
                 }
 
                 // update our response with the image
