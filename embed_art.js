@@ -89,8 +89,12 @@ const platforms = [
 
                     } else {
 
-                        if (json.posts[0].record.embed.images || (json.posts[0].record.embed.media && json.posts[0].record.embed.media.images))
+                        if (json.posts[0].record.embed.images)
                             for (const imageObject of json.posts[0].record.embed.images)
+                                images.push({ attachment: `https://cdn.bsky.app/img/feed_fullsize/plain/${ authorDID }/${ imageObject.image.ref["$link"] }@png`, name: "image.png" });
+
+                        if (json.posts[0].record.embed.media && json.posts[0].record.embed.media.images)
+                            for (const imageObject of json.posts[0].record.embed.media.images)
                                 images.push({ attachment: `https://cdn.bsky.app/img/feed_fullsize/plain/${ authorDID }/${ imageObject.image.ref["$link"] }@png`, name: "image.png" });
                     }
 
