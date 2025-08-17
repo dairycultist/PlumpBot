@@ -56,7 +56,8 @@ const platforms = [
                 // https://docs.bsky.app/docs/api/app-bsky-feed-get-posts
                 fetchCallback(url, true, async (json) => {
 
-                    const authorDID = json.posts[0].author.did.replaceAll(":", "%3A");
+                    const post = json.posts[0];
+                    const authorDID = post.author.did.replaceAll(":", "%3A");
 
                     var video_local_path = "";
                     var images = [];
@@ -64,7 +65,8 @@ const platforms = [
                     // reposts are internally different which is annoying but whatever
                     // TODO unify all video handling (despite many internal differences in API response)
 
-                    if (json.posts[0].record.embed["$type"] == "app.bsky.embed.recordWithMedia" && json.posts[0].record.embed.video) {
+                    // info on images is either in "post.embed.playlist" or "post.embed.media.playlist"
+                    if (post.record.embed["$type"] == "app.bsky.embed.recordWithMedia" && post.record.embed.video) {
 
                         // video post
                         video_local_path = "./bsky.mp4";
@@ -73,32 +75,33 @@ const platforms = [
                         // if it does exceed limit, just send ..embed.thumbnail (a url) (NOT ..record.embed)
 
                         await converter
-                            .setInputFile(json.posts[0].embed.media.playlist) // url to M3U8 stream file, converter saves it to mp4 locally
+                            .setInputFile(post.embed.media.playlist) // url to M3U8 stream file, converter saves it to mp4 locally
                             .setOutputFile(video_local_path)
                             .start();
 
-                    } else if (json.posts[0].record.embed["$type"] == "app.bsky.embed.video") {
+                    } else if (post.record.embed["$type"] == "app.bsky.embed.video") {
 
                         // video REpost
                         video_local_path = "./bsky.mp4";
 
                         await converter
-                            .setInputFile(json.posts[0].embed.playlist)
+                            .setInputFile(post.embed.playlist)
                             .setOutputFile(video_local_path)
                             .start();
 
                     } else {
 
-                        if (json.posts[0].record.embed.images)
-                            for (const imageObject of json.posts[0].record.embed.images)
+                        // info on images is either in "post.record.embed.images" or "post.record.embed.media.images"
+                        if (post.record.embed.images)
+                            for (const imageObject of post.record.embed.images)
                                 images.push({ attachment: `https://cdn.bsky.app/img/feed_fullsize/plain/${ authorDID }/${ imageObject.image.ref["$link"] }@png`, name: "image.png" });
 
-                        if (json.posts[0].record.embed.media && json.posts[0].record.embed.media.images)
-                            for (const imageObject of json.posts[0].record.embed.media.images)
+                        if (post.record.embed.media && post.record.embed.media.images)
+                            for (const imageObject of post.record.embed.media.images)
                                 images.push({ attachment: `https://cdn.bsky.app/img/feed_fullsize/plain/${ authorDID }/${ imageObject.image.ref["$link"] }@png`, name: "image.png" });
                     }
 
-                    let description = json.posts[0].record.text.match(/^.*\n+([\s\S]*)$/);
+                    let description = post.record.text.match(/^.*\n+([\s\S]*)$/);
 
                     if (description) {
                         description = description[1]; // get matching group
@@ -112,10 +115,10 @@ const platforms = [
                             img: "https://cdn.bsky.app/img/avatar/plain/did:plc:z72i7hdynmk6r22z27h6tvur/bafkreihagr2cmvl2jt4mgx3sppwe2it3fwolkrbtjrhcnwjk4jdijhsoze@jpeg",
                             color: 0x4F9BD9,
                         },
-                        title: json.posts[0].record.text.length == 0 ? "Post" : json.posts[0].record.text.split("\n", 1)[0], // title is first line of body, or "Post" if no body
-                        description: description,                                                                            // description contains rest of body (or undefined if there is none)
+                        title: post.record.text.length == 0 ? "Post" : post.record.text.split("\n", 1)[0], // title is first line of body, or "Post" if no body
+                        description: description,                                                          // description contains rest of body (or undefined if there is none)
                         url: message.content,
-                        author: json.posts[0].author.displayName,
+                        author: post.author.displayName,
                         images: images,
                         video: {
                             local_path: video_local_path
