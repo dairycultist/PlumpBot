@@ -47,85 +47,90 @@ const platforms = [
     {
         regex: new RegExp("^https://bsky.app/profile/.+/post/"),
         embed: (client, message, response) => {
+
+            // remember, the bot is supposed to be convenient, not stylish with no substance
+            // unless you find a feature with the fix link you can improve on, just use the fix link :3
+
+            response.edit(message.content.replace("bsky", "fxbsky"));
             
-            fetchCallback(message.content, false, (html) => {
+            // fetchCallback(message.content, false, (html) => {
 
-                const url = "https://public.api.bsky.app/xrpc/app.bsky.feed.getPosts?uris=" + parseLink(html, "alternate");
-                // console.log(url);
+            //     const url = "https://public.api.bsky.app/xrpc/app.bsky.feed.getPosts?uris=" + parseLink(html, "alternate");
+            //     // console.log(url);
 
-                // https://docs.bsky.app/docs/api/app-bsky-feed-get-posts
-                fetchCallback(url, true, async (json) => {
+            //     // https://docs.bsky.app/docs/api/app-bsky-feed-get-posts
+            //     fetchCallback(url, true, async (json) => {
 
-                    const post = json.posts[0];
-                    const authorDID = post.author.did.replaceAll(":", "%3A");
+            //         const post = json.posts[0];
+            //         const authorDID = post.author.did.replaceAll(":", "%3A");
 
-                    var video_local_path = "";
-                    var images = [];
+            //         var video_local_path = "";
+            //         var images = [];
 
-                    // reposts are internally different which is annoying but whatever
-                    // TODO unify all video handling (despite many internal differences in API response)
+            //         // reposts are internally different which is annoying but whatever
+            //         // TODO unify all video handling (despite many internal differences in API response)
 
-                    // info on images is either in "post.embed.playlist" or "post.embed.media.playlist"
-                    if (post.record.embed["$type"] == "app.bsky.embed.recordWithMedia" && post.record.embed.video) {
+            //         // info on images is either in "post.embed.playlist" or "post.embed.media.playlist"
+            //         if (post.record.embed["$type"] == "app.bsky.embed.recordWithMedia" && post.record.embed.video) {
 
-                        // video post
-                        video_local_path = "./bsky.mp4";
+            //             // video post
+            //             video_local_path = "./bsky.mp4";
 
-                        // TODO might want to check ..record.embed.video.size (one that exceeded Discord's limit was 5431776)
-                        // if it does exceed limit, just send ..embed.thumbnail (a url) (NOT ..record.embed)
+            //             // TODO might want to check ..record.embed.video.size (one that exceeded Discord's limit was 5431776)
+            //             // if it does exceed limit, just send ..embed.thumbnail (a url) (NOT ..record.embed)
 
-                        await converter
-                            .setInputFile(post.embed.media.playlist) // url to M3U8 stream file, converter saves it to mp4 locally
-                            .setOutputFile(video_local_path)
-                            .start();
+            //             await converter
+            //                 .setInputFile(post.embed.media.playlist) // url to M3U8 stream file, converter saves it to mp4 locally
+            //                 .setOutputFile(video_local_path)
+            //                 .start();
 
-                    } else if (post.record.embed["$type"] == "app.bsky.embed.video") {
+            //         } else if (post.record.embed["$type"] == "app.bsky.embed.video") {
 
-                        // video REpost
-                        video_local_path = "./bsky.mp4";
+            //             // video REpost
+            //             video_local_path = "./bsky.mp4";
 
-                        await converter
-                            .setInputFile(post.embed.playlist)
-                            .setOutputFile(video_local_path)
-                            .start();
+            //             await converter
+            //                 .setInputFile(post.embed.playlist)
+            //                 .setOutputFile(video_local_path)
+            //                 .start();
 
-                    } else {
+            //         } else {
 
-                        // info on images is either in "post.record.embed.images" or "post.record.embed.media.images"
-                        if (post.record.embed.images)
-                            for (const imageObject of post.record.embed.images)
-                                images.push({ attachment: `https://cdn.bsky.app/img/feed_fullsize/plain/${ authorDID }/${ imageObject.image.ref["$link"] }@png`, name: "image.png" });
+            //             // info on images is either in "post.record.embed.images" or "post.record.embed.media.images"
+            //             if (post.record.embed.images)
+            //                 for (const imageObject of post.record.embed.images)
+            //                     images.push({ attachment: `https://cdn.bsky.app/img/feed_fullsize/plain/${ authorDID }/${ imageObject.image.ref["$link"] }@png`, name: "image.png" });
 
-                        if (post.record.embed.media && post.record.embed.media.images)
-                            for (const imageObject of post.record.embed.media.images)
-                                images.push({ attachment: `https://cdn.bsky.app/img/feed_fullsize/plain/${ authorDID }/${ imageObject.image.ref["$link"] }@png`, name: "image.png" });
-                    }
+            //             if (post.record.embed.media && post.record.embed.media.images)
+            //                 for (const imageObject of post.record.embed.media.images)
+            //                     images.push({ attachment: `https://cdn.bsky.app/img/feed_fullsize/plain/${ authorDID }/${ imageObject.image.ref["$link"] }@png`, name: "image.png" });
+            //         }
 
-                    let description = post.record.text.match(/^.*\n+([\s\S]*)$/);
+            //         let description = post.record.text.match(/^.*\n+([\s\S]*)$/);
 
-                    if (description) {
-                        description = description[1]; // get matching group
-                    } else {
-                        description = undefined; // no match, either body is empty or there's only one line (the title)
-                    }
+            //         if (description) {
+            //             description = description[1]; // get matching group
+            //         } else {
+            //             description = undefined; // no match, either body is empty or there's only one line (the title)
+            //         }
 
-                    embedArt(client, message, response, {
-                        site: {
-                            name: "Bluesky",
-                            img: "https://cdn.bsky.app/img/avatar/plain/did:plc:z72i7hdynmk6r22z27h6tvur/bafkreihagr2cmvl2jt4mgx3sppwe2it3fwolkrbtjrhcnwjk4jdijhsoze@jpeg",
-                            color: 0x4F9BD9,
-                        },
-                        title: post.record.text.length == 0 ? "Post" : post.record.text.split("\n", 1)[0], // title is first line of body, or "Post" if no body
-                        description: description,                                                          // description contains rest of body (or undefined if there is none)
-                        url: message.content,
-                        author: post.author.displayName,
-                        images: images,
-                        video: {
-                            local_path: video_local_path
-                        }
-                    });
-                });
-            });
+            //         embedArt(client, message, response, {
+            //             site: {
+            //                 name: "Bluesky",
+            //                 img: "https://cdn.bsky.app/img/avatar/plain/did:plc:z72i7hdynmk6r22z27h6tvur/bafkreihagr2cmvl2jt4mgx3sppwe2it3fwolkrbtjrhcnwjk4jdijhsoze@jpeg",
+            //                 color: 0x4F9BD9,
+            //             },
+            //             title: post.record.text.length == 0 ? "Post" : post.record.text.split("\n", 1)[0], // title is first line of body, or "Post" if no body
+            //             description: description,                                                          // description contains rest of body (or undefined if there is none)
+            //             url: message.content,
+            //             author: post.author.displayName,
+            //             images: images,
+            //             video: {
+            //                 local_path: video_local_path
+            //             }
+            //         });
+            //     });
+            // });
         }
     },
     /*
