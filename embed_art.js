@@ -282,11 +282,18 @@ function embedArt(client, message, response, post) {
             files.push(image);
     }
 
-    response.edit({
-        content: "",
-        embeds: [ embed ],
-        files: files
-    });
+    try {
+
+        response.edit({
+            content: "",
+            embeds: [ embed ],
+            files: files
+        });
+
+    } catch (error) {
+
+        response.edit(error.rawError.message + "(" + error.status + ")\n" + post.url);
+    }
 }
 
 module.exports = {
