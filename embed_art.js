@@ -63,17 +63,20 @@ const platforms = [
 
                     // reposts are internally different which is annoying but whatever
 
-                    if (json.posts[0].embed["$type"] == "app.bsky.embed.recordWithMedia#view") {
+                    if (json.posts[0].record.embed["$type"] == "app.bsky.embed.recordWithMedia" && json.posts[0].record.embed.video) {
 
                         // video post
                         video_local_path = "./bsky.mp4";
+
+                        // TODO might want to check ..record.embed.video.size (one that exceeded Discord's limit was 5431776)
+                        // if it does exceed limit, just send ..embed.thumbnail (a url) (NOT ..record.embed)
 
                         await converter
                             .setInputFile(json.posts[0].embed.media.playlist) // url to M3U8 stream file, converter saves it to mp4 locally
                             .setOutputFile(video_local_path)
                             .start();
 
-                    } else if (json.posts[0].embed["$type"] == "app.bsky.embed.video#view") {
+                    } else if (json.posts[0].record.embed["$type"] == "app.bsky.embed.video") {
 
                         // video REpost
                         video_local_path = "./bsky.mp4";
@@ -282,6 +285,7 @@ function embedArt(client, message, response, post) {
             files.push(image);
     }
 
+    // attempt to send to Discord. may fail, such as from oversized attachments
     try {
 
         response.edit({
@@ -292,7 +296,7 @@ function embedArt(client, message, response, post) {
 
     } catch (error) {
 
-        response.edit(error.rawError.message + "(" + error.status + ")\n" + post.url);
+        response.edit(error.rawError.message + "(" + error.status + ")\n" + post.url); // TODO include a fix url for these exact scenarios, or have this function return a status to be handled uniquely
     }
 }
 
