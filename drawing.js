@@ -150,7 +150,7 @@ const commands = [
                     const seed = Math.floor(Math.random() * 999999);
 
                     images.push((await generateImage({
-                        pos: getArgValue("pos").replaceAll("BELLY", "flat stomach").replaceAll("HIPS", "narrow hips").replaceAll("THIGHS", "thin thighs").replaceAll("BOOBS", "flat chest") + ", (relaxed, smile, looking at viewer:0.3)",
+                        pos: getArgValue("pos").replaceAll("BELLY", "flat stomach").replaceAll("HIPS", "narrow hips").replaceAll("THIGHS", "thin thighs").replaceAll("BOOBS", "flat chest") + ", (relaxed, smile, looking at viewer:0.5)",
                         neg: getArgValue("neg"),
                         seed: seed,
                         width: w,
@@ -158,7 +158,7 @@ const commands = [
                     })));
 
                     images.push((await generateImage({
-                        pos: getArgValue("pos").replaceAll("BELLY", "big belly, bbw").replaceAll("HIPS", "wide hips").replaceAll("THIGHS", "thick thighs").replaceAll("BOOBS", "big breasts, bursting breasts") + ", (shocked, wide eyes, looking down:0.3)",
+                        pos: getArgValue("pos").replaceAll("BELLY", "big belly, bbw").replaceAll("HIPS", "wide hips").replaceAll("THIGHS", "thick thighs").replaceAll("BOOBS", "big breasts, bursting breasts") + ", (shocked, wide eyes, looking down, looking down at body:0.5)",
                         neg: getArgValue("neg"),
                         seed: seed,
                         width: w,
