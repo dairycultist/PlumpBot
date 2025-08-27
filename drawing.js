@@ -131,7 +131,7 @@ const commands = [
 
             if (getArgValue("type") == "suddenexpansion" && !getArgValue("pos").includes("SIZE")) {
 
-                await interaction.reply({ content: "Since you're using `type=suddenexpansion`, you must use the keyword `SIZE` in your prompt. **Also, do not use any prompts referring to the direction the character is looking (this is inserted automatically).**\n\nExample: `1girl, SIZE breasts, red dress`", flags: MessageFlags.Ephemeral });
+                await interaction.reply({ content: "Since you're using `type=suddenexpansion`, you must use the keyword `SIZE` in your prompt. **Also, do NOT use any prompts referring to the direction the character is looking or their mood (this is inserted automatically).**\n\nExample: `1girl, SIZE breasts, red dress`", flags: MessageFlags.Ephemeral });
                 return;
             }
 
