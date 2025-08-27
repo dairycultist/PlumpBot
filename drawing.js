@@ -82,6 +82,21 @@ const commands = [
     },
     {
         data: new SlashCommandBuilder()
+            .setName("getgradiolink")
+            .setDescription("Get the active gradio sharelink.")
+            .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
+            .toJSON(),
+        execute: async (interaction, getArgValue) => {
+
+            if (gradioID) {
+                await interaction.reply({ content: `https://${ gradioID }.gradio.live/.`, flags: MessageFlags.Ephemeral });
+            } else {
+                await interaction.reply({ content: `No gradio ID set.`, flags: MessageFlags.Ephemeral });
+            }
+        }
+    },
+    {
+        data: new SlashCommandBuilder()
             .setName("draw")
             .setDescription("Generate an image using Paperspace.")
             .addStringOption(option => option.setName("pos").setDescription("Positive prompt.").setRequired(true))
@@ -95,7 +110,8 @@ const commands = [
                 { name: "single", value: "single" },
                 { name: "single but huge", value: "singlehuge" },
                 { name: "batch of 4", value: "batch4" },
-                { name: "progression", value: "progression" }
+                { name: "progression", value: "progression" },
+                { name: "sudden expansion", value: "suddenexpansion" }
             ))
             .toJSON(),
         execute: async (interaction, getArgValue) => {
@@ -113,14 +129,42 @@ const commands = [
                 return;
             }
 
+            if (getArgValue("type") == "suddenexpansion" && !getArgValue("pos").includes("SIZE")) {
+
+                await interaction.reply({ content: "Since you're using `type=suddenexpansion`, you must use the keyword `SIZE` in your prompt. **Also, do not use any prompts referring to the direction the character is looking (this is inserted automatically).**\n\nExample: `1girl, SIZE breasts, red dress`", flags: MessageFlags.Ephemeral });
+                return;
+            }
+
             // tell Discord to wait
             await interaction.deferReply();
             
             try {
 
                 let images = [];
+                const w = getArgValue("size") ? parseInt(getArgValue("size").split("x")[0]) : 1200;
+                const h = getArgValue("size") ? parseInt(getArgValue("size").split("x")[1]) : 1200;
 
-                if (getArgValue("type") == "progression") {
+                if (getArgValue("type") == "suddenexpansion") {
+
+                    const seed = Math.floor(Math.random() * 999999);
+
+                    images.push((await generateImage({
+                        pos: getArgValue("pos").replaceAll("SIZE", "small") + ", (relaxed, looking at viewer)",
+                        neg: getArgValue("neg"),
+                        seed: seed,
+                        width: w,
+                        height: h
+                    })));
+
+                    images.push((await generateImage({
+                        pos: getArgValue("pos").replaceAll("SIZE", "large") + ", (shocked, looking down at body, leaning back, motion lines, expansion)",
+                        neg: getArgValue("neg"),
+                        seed: seed,
+                        width: w,
+                        height: h
+                    })));
+
+                } else if (getArgValue("type") == "progression") {
 
                     // TODO if one of the images fails, still send the ones we already made
 
@@ -130,32 +174,32 @@ const commands = [
                         pos: getArgValue("pos").replaceAll("SIZE", "medium"),
                         neg: getArgValue("neg"),
                         seed: seed,
-                        width: getArgValue("size") ? parseInt(getArgValue("size").split("x")[0]) : 1200,
-                        height: getArgValue("size") ? parseInt(getArgValue("size").split("x")[1]) : 1200
+                        width: w,
+                        height: h
                     })));
 
                     images.push((await generateImage({
                         pos: getArgValue("pos").replaceAll("SIZE", "large"),
                         neg: getArgValue("neg"),
                         seed: seed,
-                        width: getArgValue("size") ? parseInt(getArgValue("size").split("x")[0]) : 1200,
-                        height: getArgValue("size") ? parseInt(getArgValue("size").split("x")[1]) : 1200
+                        width: w,
+                        height: h
                     })));
 
                     images.push((await generateImage({
                         pos: getArgValue("pos").replaceAll("SIZE", "huge"),
                         neg: getArgValue("neg"),
                         seed: seed,
-                        width: getArgValue("size") ? parseInt(getArgValue("size").split("x")[0]) : 1200,
-                        height: getArgValue("size") ? parseInt(getArgValue("size").split("x")[1]) : 1200
+                        width: w,
+                        height: h
                     })));
 
                     images.push((await generateImage({
                         pos: getArgValue("pos").replaceAll("SIZE", "gigantic"),
                         neg: getArgValue("neg"),
                         seed: seed,
-                        width: getArgValue("size") ? parseInt(getArgValue("size").split("x")[0]) : 1200,
-                        height: getArgValue("size") ? parseInt(getArgValue("size").split("x")[1]) : 1200
+                        width: w,
+                        height: h
                     })));
 
                 } else if (getArgValue("type") == "batch4") {
@@ -166,8 +210,8 @@ const commands = [
                             pos: getArgValue("pos"),
                             neg: getArgValue("neg"),
                             seed: -1,
-                            width: getArgValue("size") ? parseInt(getArgValue("size").split("x")[0]) : 1200,
-                            height: getArgValue("size") ? parseInt(getArgValue("size").split("x")[1]) : 1200
+                            width: w,
+                            height: h
                         }));
                     }
 
@@ -177,8 +221,8 @@ const commands = [
                         pos: getArgValue("pos"),
                         neg: getArgValue("neg"),
                         seed: -1,
-                        width: getArgValue("size") ? parseInt(getArgValue("size").split("x")[0]) * 3 / 2 : 1800,
-                        height: getArgValue("size") ? parseInt(getArgValue("size").split("x")[1]) * 3 / 2 : 1800
+                        width: w * 3 / 2,
+                        height: h * 3 / 2
                     }));
 
                 } else {
@@ -187,8 +231,8 @@ const commands = [
                         pos: getArgValue("pos"),
                         neg: getArgValue("neg"),
                         seed: -1,
-                        width: getArgValue("size") ? parseInt(getArgValue("size").split("x")[0]) : 1200,
-                        height: getArgValue("size") ? parseInt(getArgValue("size").split("x")[1]) : 1200
+                        width: w,
+                        height: h
                     }));
                 }
 
