@@ -126,12 +126,13 @@ const commands = [
             if (getArgValue("type") == "progression" && !getArgValue("pos").includes("SIZE")) {
 
                 await interaction.reply({ content: "Since you're using `type=progression`, you must use the keyword `SIZE` in your prompt.\n\nExample: `1girl, SIZE breasts, red dress`", flags: MessageFlags.Ephemeral });
+                // await interaction.reply({ content: "Since you're using `type=progression`, include one or more of `BELLY, HIPS, THIGHS, BOOBS` to have that bodypart grow as part of the progression.", flags: MessageFlags.Ephemeral });
                 return;
             }
 
             if (getArgValue("type") == "suddenexpansion" && !getArgValue("pos").includes("SIZE")) {
 
-                await interaction.reply({ content: "Since you're using `type=suddenexpansion`, you must use the keyword `SIZE` in your prompt. **Also, do NOT use any prompts referring to the direction the character is looking or their mood (this is inserted automatically).**\n\nExample: `1girl, SIZE breasts, red dress`", flags: MessageFlags.Ephemeral });
+                await interaction.reply({ content: "Since you're using `type=suddenexpansion`, include one or more of `BELLY, HIPS, THIGHS, BOOBS` to have that bodypart grow as part of the sudden expansion. **Also, do NOT use any prompts referring to the direction the character is looking or their mood (this is inserted automatically).**", flags: MessageFlags.Ephemeral });
                 return;
             }
 
@@ -149,7 +150,7 @@ const commands = [
                     const seed = Math.floor(Math.random() * 999999);
 
                     images.push((await generateImage({
-                        pos: getArgValue("pos").replaceAll("SIZE", "small") + ", (relaxed, looking at viewer)",
+                        pos: getArgValue("pos").replaceAll("BELLY", "flat stomach").replaceAll("HIPS", "narrow hips").replaceAll("THIGHS", "thin thighs").replaceAll("BOOBS", "flat chest") + ", (relaxed, looking at viewer)",
                         neg: getArgValue("neg"),
                         seed: seed,
                         width: w,
@@ -157,7 +158,7 @@ const commands = [
                     })));
 
                     images.push((await generateImage({
-                        pos: getArgValue("pos").replaceAll("SIZE", "large") + ", (shocked, looking down at body, leaning back, motion lines, expansion)",
+                        pos: getArgValue("pos").replaceAll("BELLY", "huge belly, fat belly, bbw").replaceAll("HIPS", "wide hips").replaceAll("THIGHS", "thick thighs").replaceAll("BOOBS", "huge breasts, bursting breasts") + ", (shocked, looking down at body, leaning back, motion lines, expansion)",
                         neg: getArgValue("neg"),
                         seed: seed,
                         width: w,
