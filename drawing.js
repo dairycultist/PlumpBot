@@ -130,7 +130,7 @@ const commands = [
                 return;
             }
 
-            if (getArgValue("type") == "suddenexpansion" && !getArgValue("pos").includes("SIZE")) {
+            if (getArgValue("type") == "suddenexpansion" && !(getArgValue("pos").includes("BELLY") || getArgValue("pos").includes("HIPS") || getArgValue("pos").includes("THIGHS") || getArgValue("pos").includes("BOOBS"))) {
 
                 await interaction.reply({ content: "Since you're using `type=suddenexpansion`, include one or more of `BELLY, HIPS, THIGHS, BOOBS` to have that bodypart grow as part of the sudden expansion. **Also, do NOT use any prompts referring to the direction the character is looking or their mood (this is inserted automatically).**", flags: MessageFlags.Ephemeral });
                 return;
