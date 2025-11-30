@@ -33,7 +33,9 @@ fs.readFile("./login.env", "utf8", async (err, data) => {
 
 	await sleep(5);
 
-	await page.goto("https://console.paperspace.com/tbp1l86qmb/notebook/rzaf4sanl19bidn?file=%2Flauncher.ipynb");
+	// go to notebook page
+	await page.goto("https://console.paperspace.com/tbp1l86qmb/notebook/rzaf4sanl19bidn");
+	
 	await sleep(5);
 
 	// stop notebook if it's running to ensure predictable state
@@ -45,20 +47,28 @@ fs.readFile("./login.env", "utf8", async (err, data) => {
 	}
 
 	// start notebook
-	page.getByRole("button", { name: "Start machine" }).click();
+	await page.getByRole("button", { name: "Start machine" }).click();
+	await sleep(2);
 
 	// run launcher
+	await page.goto("https://console.paperspace.com/tbp1l86qmb/notebook/rzaf4sanl19bidn?file=%2Flauncher.ipynb");
+
 	await page.getByRole("button", { name: "Run all" }).click();
+	await sleep(2);
 
 	// run looper
 	await page.goto("https://console.paperspace.com/tbp1l86qmb/notebook/rzaf4sanl19bidn?file=%2Flooper.ipynb");
 
 	await page.getByRole("button", { name: "Run all" }).click();
+	await sleep(2);
 
 	// open terminal
 	await page.locator(`[aria-controls="radix-4-content-terminals"]`).click();
 
-	await page.locator(`[class="c-jpjkst c-jpjkst-RQAZs-variant-action"]`).click();
+	await page.mouse.click(80, 100);
+	await page.mouse.click(80, 100);
+	await page.mouse.click(80, 100);
+	await page.mouse.click(80, 100);
 
 
 	await sleep(10);
