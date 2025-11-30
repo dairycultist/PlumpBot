@@ -1,6 +1,8 @@
 const { firefox } = require("playwright"); // npm install playwright
 const fs = require("fs");
 
+// Putting up WebUI (I will send the link in this channel once it's up). This may take a while! This command is not very fieldtested --- if after >5 minutes it doesn't send anything, try again, but please be patient!
+
 // await page.screenshot({ path: "screenshot.png" });
 
 async function sleep(sec) {
@@ -63,12 +65,14 @@ fs.readFile("./login.env", "utf8", async (err, data) => {
 	// open terminal
 	await page.locator(`[aria-controls="radix-4-content-terminals"]`).click();
 
-	await page.mouse.click(80, 100);
+	await page.mouse.click(80, 100); // maybe only need one I just spammed it for testing
 	await page.mouse.click(80, 100);
 	await page.mouse.click(80, 100);
 	await page.mouse.click(80, 100);
 
-	await page.locator(`[aria-label="Terminal input"]`).fill("example value");
+	await page.locator(`[aria-label="Terminal input"]`).fill("ls\nls");
+
+	await sleep(60);
 
 	await sleep(10);
 	await browser.close();
