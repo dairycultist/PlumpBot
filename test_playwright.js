@@ -7,18 +7,6 @@ async function sleep(sec) {
 	return new Promise(resolve => setTimeout(resolve, sec * 1000));
 }
 
-async function clickButtonIfExists(page, name) { // DON'T await on this because if the button doesn't exist it'll just wait forever
-
-	try {
-
-		const button = page.getByRole("button", { name: name });
-
-		if (button.count != 0)
-			await button.click();
-
-	} catch (e) {}
-}
-
 fs.readFile("./login.env", "utf8", async (err, data) => {
 
 	if (err) {
@@ -45,11 +33,19 @@ fs.readFile("./login.env", "utf8", async (err, data) => {
 
 	await sleep(5);
 
-	// start notebook
 	await page.goto("https://console.paperspace.com/tbp1l86qmb/notebook/rzaf4sanl19bidn?file=%2Flauncher.ipynb");
 	await sleep(5);
 
-	clickButtonIfExists(page, "Start machine");
+	// stop notebook if it's running to ensure predictable state
+	{
+		const button = page.getByRole("button", { name: "Stop machine" });
+
+		if (await button.count() != 0)
+			await button.click();
+	}
+
+	// start notebook
+	page.getByRole("button", { name: "Start machine" }).click();
 
 	// run launcher
 	await page.getByRole("button", { name: "Run all" }).click();
@@ -59,7 +55,10 @@ fs.readFile("./login.env", "utf8", async (err, data) => {
 
 	await page.getByRole("button", { name: "Run all" }).click();
 
+	// open terminal
+	await page.locator(`[aria-controls="radix-4-content-terminals"]`).click();
 
+	await page.locator(`[class="c-jpjkst c-jpjkst-RQAZs-variant-action"]`).click();
 
 
 	await sleep(10);
