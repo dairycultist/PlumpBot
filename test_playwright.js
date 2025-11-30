@@ -65,15 +65,18 @@ fs.readFile("./login.env", "utf8", async (err, data) => {
 	// open terminal
 	await page.locator(`[aria-controls="radix-4-content-terminals"]`).click();
 
-	await page.mouse.click(80, 100); // maybe only need one I just spammed it for testing
+	await page.mouse.click(80, 100); // clicking doesn't always have a chance of working on the button so I just press it a bunch to ensure a terminal pops up
+	await page.mouse.click(80, 100); // for some reason the selector didn't work, maybe because of the same click-dropping thing
 	await page.mouse.click(80, 100);
 	await page.mouse.click(80, 100);
-	await page.mouse.click(80, 100);
-
-	await page.locator(`[aria-label="Terminal input"]`).fill("ls\nls");
 
 	await sleep(60);
 
-	await sleep(10);
+	await page.locator(`[aria-label="Terminal input"]`).fill("cd /notebooks/stable-diffusion-webui\nsource venv/bin/activate\n./webui.sh\n");
+
+	await sleep(70);
+
+	await page.locator(`[class="xterm-text-layer"]`).screenshot({ animations: "disabled", path: "link.png" });
+
 	await browser.close();
 });
