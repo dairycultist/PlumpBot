@@ -1,5 +1,5 @@
 const fs = require("fs");
-const { firefox } = require("playwright"); // npm install playwright
+const { firefox } = require("playwright"); // npm install playwright // sudo npx playwright install-deps
 const { MessageFlags, SlashCommandBuilder, PermissionFlagsBits, REST, Routes, AttachmentBuilder } = require("discord.js");
 
 // mini goal is to have the bot take in a paperspace key as part of the config, and having a "start drawing backend" and "stop drawing backend" command, creating the notebook, starting it, and storing the gradio link
@@ -76,18 +76,16 @@ const commands = [
 
 			await interaction.reply(`Putting up WebUI (I will send AN IMAGE CONTAINING THE LINK in this channel once it's up). This may take a while! This command is not very fieldtested --- if after >5 minutes it doesn't send anything, try again, but please be patient!`);
 
-			try {
+			fs.readFile("./login.env", "utf8", async (err, data) => {
 
-				fs.readFile("./login.env", "utf8", async (err, data) => {
+				try {
 
 					const sleep = async (sec) => {
 						return new Promise(resolve => setTimeout(resolve, sec * 1000));
 					};
 
-					if (err) {
-						console.error("Error reading file: ", err);
-						return;
-					}
+					if (err)
+						throw new Error("Login failure.");
 
 					data = data.split("\n");
 
@@ -127,16 +125,21 @@ const commands = [
 
 					// run launcher
 					await page.goto("https://console.paperspace.com/tbp1l86qmb/notebook/rzaf4sanl19bidn?file=%2Flauncher.ipynb");
+					await sleep(2); // ...
 
 					await page.getByRole("button", { name: "Run all" }).click();
+					await sleep(2); // ...
 
 					// run looper
 					await page.goto("https://console.paperspace.com/tbp1l86qmb/notebook/rzaf4sanl19bidn?file=%2Flooper.ipynb");
+					await sleep(2); // ...
 
 					await page.getByRole("button", { name: "Run all" }).click();
+					await sleep(2); // ...
 
 					// open terminal
 					await page.locator(`[aria-controls="radix-4-content-terminals"]`).click();
+					await sleep(2); // ...
 
 					await page.mouse.click(80, 100); // clicking doesn't always have a chance of working on the button so I just press it a bunch to ensure a terminal pops up
 					await page.mouse.click(80, 100); // for some reason the selector didn't work, maybe because of the same click-dropping thing
@@ -158,12 +161,12 @@ const commands = [
 					await interaction.channel.send({ files: [{ attachment: "link.png" }] });
 
 					await browser.close();
-				});
+				
+				} catch (e) {
 
-			} catch (e) {
-
-				await interaction.channel.send(`Error: \`\`\`${ e }\`\`\``);
-			}
+					await interaction.channel.send(`Error: \`\`\`${ e }\`\`\``);
+				}
+			});
 
 		}
 	},
