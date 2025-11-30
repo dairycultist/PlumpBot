@@ -1,6 +1,24 @@
 const { firefox } = require("playwright"); // npm install playwright
 const fs = require("fs");
 
+// await page.screenshot({ path: "screenshot.png" });
+
+async function sleep(sec) {
+	return new Promise(resolve => setTimeout(resolve, sec * 1000));
+}
+
+async function clickButtonIfExists(page, name) { // DON'T await on this because if the button doesn't exist it'll just wait forever
+
+	try {
+
+		const button = page.getByRole("button", { name: name });
+
+		if (button.count != 0)
+			await button.click();
+
+	} catch (e) {}
+}
+
 fs.readFile("./login.env", "utf8", async (err, data) => {
 
 	if (err) {
@@ -14,8 +32,10 @@ fs.readFile("./login.env", "utf8", async (err, data) => {
 	const password = data[1];
 
 	// open playwright window
-	const browser = await firefox.launch({ headless: false });
+	const browser = await firefox.launch({ headless: false }); // set to false to see what it's doing
 	const page = await browser.newPage();
+
+	// log in
 	await page.goto("https://console.paperspace.com/login");
 	
 	await page.locator(`[name="email"]`).fill(email);
@@ -23,10 +43,25 @@ fs.readFile("./login.env", "utf8", async (err, data) => {
 	
 	await page.getByRole("button", { name: "Log in" }).click();
 
-	await new Promise(resolve => setTimeout(resolve, 5 * 1000));
+	await sleep(5);
 
-	await page.screenshot({ path: "screenshot.png" });
+	// start notebook
+	await page.goto("https://console.paperspace.com/tbp1l86qmb/notebook/rzaf4sanl19bidn?file=%2Flauncher.ipynb");
+	await sleep(5);
 
+	clickButtonIfExists(page, "Start machine");
+
+	// run launcher
+	await page.getByRole("button", { name: "Run all" }).click();
+
+	// run looper
+	await page.goto("https://console.paperspace.com/tbp1l86qmb/notebook/rzaf4sanl19bidn?file=%2Flooper.ipynb");
+
+	await page.getByRole("button", { name: "Run all" }).click();
+
+
+
+
+	await sleep(10);
 	await browser.close();
-
 });
